@@ -1,0 +1,1 @@
+ghci -isrc:src -isrc:test -XOverloadedStrings

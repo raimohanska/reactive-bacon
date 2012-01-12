@@ -1,0 +1,26 @@
+Name:                reactive-bacon
+Version:             0.1
+Synopsis:            FRP (functional reactive programming) framework inspired by RX and Iteratee
+License:             BSD3
+License-file:        LICENSE
+Author:              Juha Paananen
+Maintainer:          juha.paananen@gmail.com
+Category:            Reactive
+Build-type:          Simple
+
+Cabal-version:       >=1.2
+
+
+Library
+  -- Modules exported by the library.
+  -- Exposed-modules:     
+  
+  -- Packages needed in order to build this package.
+  -- Build-depends:       
+  
+  -- Modules not exported by this package.
+  -- Other-modules:       
+  
+  -- Extra tools (e.g. alex, hsc2hs, ...) needed to build the source.
+  -- Build-tools:         
+  
