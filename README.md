@@ -25,7 +25,5 @@ List example:
 Status
 ------
 
-- Observable, Observer and Disposable defined, working in the IO Monad
-- "PushCollection" is a simple implementation of Observable. Push it!
-- Observer has now next/end/error functions
-- Some combinators implemented. Most of them badly.
+- Working Source instances for PushCollection and Lists
+- Easiest combinators (filter, map) implemented
