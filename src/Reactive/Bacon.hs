@@ -20,6 +20,9 @@ type Disposable = IO ()
 class Source s where
   getObservable :: s a -> Observable a
 
+instance Source Observable where
+  getObservable = id
+
 instance Functor Observable where
   fmap = map
 
@@ -48,7 +51,7 @@ toObserver next = Observer defaultHandler
         defaultHandler (Error e) = fail e
 
 observableList :: [a] -> Observable a
-observableList list = toObservable subscribe 
+observableList list = Observable subscribe 
   where subscribe observer = feed observer list >> return (return ())
         feed observer (x:xs) = do result <- consume observer $ Next x
                                   case result of
@@ -72,7 +75,7 @@ filteredBy filter src = Observable $ subscribe'
         mapped consume (End)     = consume End
         mapped consume (Error s) = consume (Error s)
 
-(==>) :: Observable a -> (a -> IO()) -> IO()
-(==>) src f = void $ subscribe src $ toObserver f
+(==>) :: Source s => s a -> (a -> IO()) -> IO()
+(==>) src f = void $ subscribe (getObservable src) $ toObserver f
 
 (@?) = flip filter
