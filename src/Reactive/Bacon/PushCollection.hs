@@ -1,4 +1,4 @@
-module Reactive.Bacon.PushCollection(newPushCollection, push) where
+module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push) where
 
 import Reactive.Bacon
 import Data.IORef

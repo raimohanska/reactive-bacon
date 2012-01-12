@@ -1,11 +1,24 @@
-Rx for Haskell
+reactive-bacon
 ==============
 
-Attempt to implement the Reactive Extensions API in Haskell. Just for
-the sake of it. Like this:
+FRP (functional reactive programming) framework inspired by RX and Iteratee
+
+PushCollection GHCI example:
 
 ~~~ {.haskell}
-*Rx> subscribe (select show (Rx.filter even $ observableList [1, 2])) putStrLn
+> :m Reactive.Bacon Reactive.Bacon.PushCollection
+> pc <- newPushCollection :: IO (PushCollection String)
+> pc ==> print
+> push pc "lol"
+"lol"
+~~~
+
+List example:
+
+~~~ {.haskell}
+> :M Reactive.Bacon
+> [1, 2, 3, 4] @? (<3) ==> print
+1
 2
 ~~~
 

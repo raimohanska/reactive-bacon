@@ -19,6 +19,9 @@ class Source s where
 instance Source Observable where
   getObservable = id
 
+instance Source [] where
+  getObservable = observableList
+
 instance Functor Observable where
   fmap = map
 
@@ -36,7 +39,6 @@ toObserver next = Observer defaultHandler
         defaultHandler End = return NoMore
         defaultHandler (Error e) = fail e
 
-observableList :: [a] -> Observable a
 observableList list = Observable subscribe 
   where subscribe observer = feed observer list >> return (return ())
         feed observer (x:xs) = do result <- consume observer $ Next x
@@ -64,4 +66,5 @@ filteredBy filter src = Observable $ subscribe'
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
 (==>) src f = void $ subscribe (getObservable src) $ toObserver f
 
-(@?) = flip filter
+(@?) :: Source s => s a -> (a -> Bool) -> Observable a
+(@?) src f = filter f (getObservable src)
