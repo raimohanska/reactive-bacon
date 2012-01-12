@@ -16,8 +16,8 @@ PushCollection GHCI example:
 List example:
 
 ~~~ {.haskell}
-> :M Reactive.Bacon
-> [1, 2, 3, 4] @? (<3) ==> print
+> import qualified Reactive.Bacon as B
+> B.takeWhile (<3) [1,2,3,4,1] ==> print
 1
 2
 ~~~

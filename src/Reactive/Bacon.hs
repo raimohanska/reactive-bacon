@@ -47,21 +47,26 @@ observableList list = Observable subscribe
                                       NoMore   -> return ()
         feed observer _      = consume observer End >> return ()
 
-map :: (a -> b) -> Observable a -> Observable b
+map :: Source s => (a -> b) -> s a -> Observable b
 map f = filteredBy mapper
   where mapper sink x = sink (Next (f x)) 
 
-filter :: (a -> Bool) -> Observable a -> Observable a
+filter :: Source s => (a -> Bool) -> s a -> Observable a
 filter f = filteredBy filter'
   where filter' sink x | f x       = sink (Next x)
                        | otherwise = return More
 
-filteredBy :: ((Event b -> IO (HandleResult)) -> a -> IO (HandleResult)) -> Observable a -> Observable b
+filteredBy :: Source s => ((Event b -> IO (HandleResult)) -> a -> IO (HandleResult)) -> s a -> Observable b
 filteredBy filter src = Observable $ subscribe' 
-  where subscribe' (Observer consume) = subscribe src $ Observer (mapped consume)
+  where subscribe' (Observer consume) = subscribe (getObservable src) $ Observer (mapped consume)
         mapped consume (Next x)  = filter consume x
         mapped consume (End)     = consume End
         mapped consume (Error s) = consume (Error s)
+
+takeWhile :: Source s => (a -> Bool) -> s a -> Observable a
+takeWhile f = filteredBy takeWhile'
+  where takeWhile' sink x | f x       = sink (Next x)
+                          | otherwise = return NoMore
 
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
 (==>) src f = void $ subscribe (getObservable src) $ toObserver f
