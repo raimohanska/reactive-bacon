@@ -1,10 +1,6 @@
-{-# LANGUAGE TupleSections #-}
 module Reactive.Bacon where
 
 import Control.Monad
-import Control.Concurrent.STM
-import Control.Concurrent.STM.TVar
-import Data.IORef
 import Prelude hiding (map, filter)
 
 data Observable a = Observable { subscribe :: (Observer a -> IO Disposable) }
@@ -30,16 +26,6 @@ instance Functor Event where
   fmap f (Next a)  = Next (f a)
   fmap _ End       = End
   fmap _ (Error e) = Error e 
-
-{-
-instance Monad Observable where
-  return a = observableList [a]
-  (>>=) = selectMany
-
-instance MonadPlus Observable where
-  mzero = observableList []
-  mplus = merge 
--}
 
 toObservable :: (Observer a -> IO Disposable) -> Observable a
 toObservable subscribe = Observable subscribe

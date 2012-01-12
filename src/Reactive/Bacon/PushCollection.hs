@@ -1,5 +1,3 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
-
 module Reactive.Bacon.PushCollection(newPushCollection, push) where
 
 import Reactive.Bacon
