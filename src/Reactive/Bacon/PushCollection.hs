@@ -11,17 +11,21 @@ instance Eq (Subscription q) where
 data PushCollection a = PushCollection (IORef ([Subscription a], Int))
 
 instance Source PushCollection where
-  getObservable collection = toObservable (subscribePushCollection collection)
+  getObservable collection = Observable (subscribePushCollection collection)
 
 subscribePushCollection (PushCollection ref) observer = do
-        (observers, id) <- readIORef ref
+        (subscriptions, id) <- readIORef ref
         let subscription = Subscription observer id
-        writeIORef ref $ (subscription : observers, id+1) 
-        return (removeFromListRef ref subscription)
+        writeIORef ref $ (subscription : subscriptions, id+1) 
+        return (removeSubscription ref subscription)
 
-removeFromListRef ref subscriber = do
-    (observers, id) <- readIORef ref
-    writeIORef ref $ (Prelude.filter (/= subscriber) observers, id)
+removeSubscription ref s = modifyIORef ref removeSubscription'
+    where removeSubscription' (observers, counter) = (filter (/= s) observers, counter)
+
+replaceObserver ref (Subscription _ id) newObserver = modifyIORef ref replaceObserver'
+    where replaceObserver' (subscriptions, counter) = (map replace subscriptions, counter)
+          replace (Subscription _ id) = Subscription newObserver id
+          replace s                   = s
   
 newPushCollection :: IO (PushCollection a)
 newPushCollection = liftM PushCollection (newIORef ([], 1))
@@ -32,5 +36,5 @@ push (PushCollection listRef) item = do
     mapM_  (applyTo item) observers
   where applyTo item s@(Subscription observer _) = do result <- consume observer . Next $ item
                                                       case result of
-                                                         More   -> return ()
-                                                         NoMore -> removeFromListRef listRef s
+                                                         More ob2 -> replaceObserver listRef s (Observer ob2)
+                                                         NoMore -> removeSubscription listRef s

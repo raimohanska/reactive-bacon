@@ -5,11 +5,13 @@ import Prelude hiding (map, filter)
 
 data Observable a = Observable { subscribe :: (Observer a -> IO Disposable) }
 
-data Observer a = Observer { consume :: (Event a -> IO (HandleResult)) }
+data Observer a = Observer { consume :: Sink a }
 
-data HandleResult = More | NoMore
+type Sink a = (Event a -> IO (HandleResult a))
 
-data Event a = Next a | End | Error String
+data HandleResult a = More (Sink a) | NoMore
+
+data Event a = Next a | End
 
 type Disposable = IO ()
 
@@ -23,53 +25,63 @@ instance Source [] where
   getObservable = observableList
 
 instance Functor Observable where
-  fmap = map
+  fmap = mapE
 
 instance Functor Event where
   fmap f (Next a)  = Next (f a)
   fmap _ End       = End
-  fmap _ (Error e) = Error e 
-
-toObservable :: (Observer a -> IO Disposable) -> Observable a
-toObservable subscribe = Observable subscribe
 
 toObserver :: (a -> IO()) -> Observer a
 toObserver next = Observer defaultHandler
-  where defaultHandler (Next x) = next x >> return More
+  where defaultHandler (Next x) = next x >> return (More defaultHandler)
         defaultHandler End = return NoMore
-        defaultHandler (Error e) = fail e
 
 observableList list = Observable subscribe 
-  where subscribe observer = feed observer list >> return (return ())
-        feed observer (x:xs) = do result <- consume observer $ Next x
-                                  case result of
-                                      More -> feed observer xs
-                                      NoMore   -> return ()
-        feed observer _      = consume observer End >> return ()
+  where subscribe (Observer sink) = feed sink list >> return (return ())
+        feed sink (x:xs) = do result <- sink $ Next x
+                              case result of
+                                 More o2 -> feed o2 xs
+                                 NoMore  -> return ()
+        feed sink _      = sink End >> return ()
 
-map :: Source s => (a -> b) -> s a -> Observable b
-map f = filteredBy mapper
-  where mapper sink x = sink (Next (f x)) 
+mapE :: Source s => (a -> b) -> s a -> Observable b
+mapE f = sinkMap mappedSink 
+  where mappedSink sink event = sink (fmap f event) >>= return . convertResult
+        convertResult = mapResult (More . mappedSink)
 
-filter :: Source s => (a -> Bool) -> s a -> Observable a
-filter f = filteredBy filter'
-  where filter' sink x | f x       = sink (Next x)
-                       | otherwise = return More
+filterE :: Source s => (a -> Bool) -> s a -> Observable a
+filterE f = sinkMap filteredSink 
+  where filteredSink sink End = sink End
+        filteredSink sink (Next x) | f x  = sink (Next x)
+                                   | otherwise = return $ More (filteredSink sink)
 
-filteredBy :: Source s => ((Event b -> IO (HandleResult)) -> a -> IO (HandleResult)) -> s a -> Observable b
-filteredBy filter src = Observable $ subscribe' 
-  where subscribe' (Observer consume) = subscribe (getObservable src) $ Observer (mapped consume)
-        mapped consume (Next x)  = filter consume x
-        mapped consume (End)     = consume End
-        mapped consume (Error s) = consume (Error s)
+takeWhileE :: Source s => (a -> Bool) -> s a -> Observable a
+takeWhileE f = sinkMap limitedSink
+  where limitedSink sink End = sink End
+        limitedSink sink (Next x) | f x  = sink (Next x)
+                                  | True = return NoMore
 
-takeWhile :: Source s => (a -> Bool) -> s a -> Observable a
-takeWhile f = filteredBy takeWhile'
-  where takeWhile' sink x | f x       = sink (Next x)
-                          | otherwise = return NoMore
+takeE :: Source s => Int -> s a -> Observable a
+takeE 0 _   = getObservable []
+takeE n src = sinkMap (limitedSink n) src
+  where limitedSink n sink End = sink End
+        limitedSink n sink (Next x) = sink (Next x) >>= return . (convertResult n)
+        convertResult 1 = \_ -> NoMore
+        convertResult n = mapResult (More . (limitedSink (n-1))) 
+
+sinkMap :: Source s => (Sink b -> Sink a) -> s a -> Observable b
+sinkMap sinkMapper src = Observable $ subscribe'
+  where subscribe' observer = subscribe (getObservable src) $ mappedObserver observer
+        mappedObserver (Observer sink) = Observer $ sinkMapper sink
+
+mapResult :: (Sink a -> HandleResult b) -> HandleResult a -> HandleResult b
+mapResult _ NoMore = NoMore
+mapResult f (More sink) = f sink
 
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
 (==>) src f = void $ subscribe (getObservable src) $ toObserver f
 
 (@?) :: Source s => s a -> (a -> Bool) -> Observable a
-(@?) src f = filter f (getObservable src)
+(@?) src f = filterE f (getObservable src)
+
+(|>) = flip ($)
