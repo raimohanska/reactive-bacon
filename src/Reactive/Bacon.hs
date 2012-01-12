@@ -71,3 +71,8 @@ filteredBy filter src = Observable $ subscribe'
         mapped consume (Next x)  = filter consume x
         mapped consume (End)     = consume End
         mapped consume (Error s) = consume (Error s)
+
+(==>) :: Observable a -> (a -> IO()) -> IO()
+(==>) src f = void $ subscribe src $ toObserver f
+
+(@?) = flip filter
