@@ -10,7 +10,7 @@ import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
-  : timedTest : combineLatestTest : mergeTests ++ takeTests
+  : scanTest : timedTest : combineLatestTest : mergeTests ++ takeTests
 
 mergeTests = [
   eventTest "mergeE with cold observable" (mergeE [1, 2] [3, 4]) ([n 1, n 2, n 3, n 4, e])
@@ -24,6 +24,8 @@ takeWhileTest = eventTest "takeWhileE takes while condition is true" (takeWhileE
 filterTest = eventTest "filterE filters" (filterE (<3) [1, 2, 3, 1]) ([n 1, n 2, n 1, e])
 
 mapTest = eventTest "mapE maps" (mapE (+1) [1, 2]) ([n 2, n 3, e])
+
+scanTest = eventTest "mapE maps" (scanE (+) 0 [1, 2]) ([n 1, n 3, e])
 
 combineLatestTest = eventTest "combineLatest combines" (combineLatestE (timed [(0, "a1")]) (timed [(1, "b1"), (1, "b2")])) [n ("a1", "b1"), n ("a1", "b2"), e]
 
