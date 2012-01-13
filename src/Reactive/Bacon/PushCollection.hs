@@ -24,8 +24,8 @@ removeSubscription ref s = modifyIORef ref removeSubscription'
 
 replaceObserver ref (Subscription _ id) newObserver = modifyIORef ref replaceObserver'
     where replaceObserver' (subscriptions, counter) = (map replace subscriptions, counter)
-          replace (Subscription _ id) = Subscription newObserver id
-          replace s                   = s
+          replace s@(Subscription _ id2) | id2 == id = Subscription newObserver id
+                                         | otherwise = s
   
 newPushCollection :: IO (PushCollection a)
 newPushCollection = liftM PushCollection (newIORef ([], 1))

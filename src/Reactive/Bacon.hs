@@ -48,6 +48,11 @@ mapE :: Source s => (a -> b) -> s a -> Observable b
 mapE f = sinkMap mappedSink 
   where mappedSink sink event = mapOutput mappedSink sink (fmap f event)
 
+scanE :: Source s => (b -> a -> b) -> b -> s a -> Observable b
+scanE f seed = sinkMap (scanSink seed)
+  where scanSink acc sink End = sink End >> return NoMore 
+        scanSink acc sink (Next x) = mapOutput (scanSink (f acc x)) sink (Next (f acc x))
+
 filterE :: Source s => (a -> Bool) -> s a -> Observable a
 filterE f = sinkMap filteredSink 
   where filteredSink sink End = sink End
@@ -84,7 +89,13 @@ mapResult f (More sink) = f sink
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
 (==>) src f = void $ subscribe (getObservable src) $ toObserver f
 
+(|=>) :: Source s => s a -> (a -> IO()) -> IO Disposable
+(|=>) src f = subscribe (getObservable src) $ toObserver f
+
 (@?) :: Source s => s a -> (a -> Bool) -> Observable a
 (@?) src f = filterE f (getObservable src)
 
 (|>) = flip ($)
+
+obs :: Source s => s a -> Observable a
+obs = getObservable
