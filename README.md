@@ -22,6 +22,8 @@ List example:
 2
 ~~~
 
+More [examples](src/Reactive/Bacon/Examples.hs) available!
+
 Status
 ------
 
