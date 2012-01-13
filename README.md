@@ -19,8 +19,10 @@ Differences to RX:
 Differences to reactive-banana:
 
 - No separate "build event network phase"
+- No Behavior/Discrete types. Just Observable (which is similar to Event in banana)
 - Easier to implement combinators
-- Lots of combinators included
+- More combinators included
+- Monad and Applicative instances for Observable
 
 Included instances of `Source`:
 
