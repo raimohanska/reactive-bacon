@@ -9,10 +9,13 @@ import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
-baconTests = TestList $ mergeTest : takeWhileTest : filterTest : mapTest 
-  : timedTest : combineLatestTest : takeTests
+baconTests = TestList $ takeWhileTest : filterTest : mapTest 
+  : timedTest : combineLatestTest : mergeTests ++ takeTests
 
-mergeTest = eventTest "mergeE produces events from both + End" (mergeE [1, 2] [3, 4]) ([n 1, n 2, n 3, n 4, e])
+mergeTests = [
+  eventTest "mergeE with cold observable" (mergeE [1, 2] [3, 4]) ([n 1, n 2, n 3, n 4, e])
+  ,eventTest "mergeE with hot observable" (mergeE (timed [(0, "1"), (1, "2")]) (timed [(2, "3"), (1, "4")])) ([n "1", n "2", n "3", n "4", e])
+  ]
 
 timedTest = eventTest "timed source delivers" (timed [(0, "a"), (1, "b"), (0, "c")]) [n "a", n "b", n "c", e]
 
