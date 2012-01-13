@@ -46,22 +46,19 @@ observableList list = Observable subscribe
 
 mapE :: Source s => (a -> b) -> s a -> Observable b
 mapE f = sinkMap mappedSink 
-  where mappedSink sink event = sink (fmap f event) >>= return . convertResult
-        convertResult = mapResult (More . mappedSink)
+  where mappedSink sink event = mapOutput mappedSink sink (fmap f event)
 
 filterE :: Source s => (a -> Bool) -> s a -> Observable a
 filterE f = sinkMap filteredSink 
   where filteredSink sink End = sink End
-        filteredSink sink (Next x) | f x  = sink (Next x) >>= return . convertResult
+        filteredSink sink (Next x) | f x  = mapOutput filteredSink sink (Next x)
                                    | otherwise = return $ More (filteredSink sink)
-        convertResult = mapResult (More . filteredSink)
 
 takeWhileE :: Source s => (a -> Bool) -> s a -> Observable a
 takeWhileE f = sinkMap limitedSink
   where limitedSink sink End = sink End
-        limitedSink sink (Next x) | f x  = sink (Next x) >>= return . convertResult
+        limitedSink sink (Next x) | f x  = mapOutput limitedSink sink (Next x)
                                   | otherwise = return NoMore
-        convertResult = mapResult (More . limitedSink)
 
 takeE :: Source s => Int -> s a -> Observable a
 takeE 0 _   = getObservable []
@@ -78,6 +75,10 @@ sinkMap :: Source s => (Sink b -> Sink a) -> s a -> Observable b
 sinkMap sinkMapper src = Observable $ subscribe'
   where subscribe' observer = subscribe (getObservable src) $ mappedObserver observer
         mappedObserver (Observer sink) = Observer $ sinkMapper sink
+
+mapOutput :: (Sink b -> Sink a) -> Sink b -> Event b -> IO (HandleResult a)
+mapOutput mapper sink event = sink event >>= return . convertResult
+  where convertResult = mapResult (More . mapper)
 
 mapResult :: (Sink a -> HandleResult b) -> HandleResult a -> HandleResult b
 mapResult _ NoMore = NoMore
