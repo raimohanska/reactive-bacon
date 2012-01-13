@@ -23,6 +23,12 @@ Interfaces:
 - (Monad not yet implemented)`
 - Num (yes, you can do `a` + `Observable a`!)
 
+Infix operators:
+
+- `==>` : assign side-effect
+- `|=>` : side-effect, return Dispose function for unsubscribing
+- `@?` : infix form of filterE
+
 PushCollection example:
 
 ~~~ {.haskell}
@@ -64,8 +70,8 @@ Status
 ------
 
 - Working Source instances for PushCollection and Lists
-- Simple transformers implemented: filterE, mapE, scanE, takeWhileE, takeE
-- Some combinators implemented: mergeE, combineLatestE
+- Simple transformers implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`
+- Some combinators implemented: `mergeE`, `combineLatestE`, `combineLatestWithE`
 
 Todo
 ----
