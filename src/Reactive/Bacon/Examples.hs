@@ -3,7 +3,10 @@ module Reactive.Bacon.Examples where
 import Reactive.Bacon
 import Reactive.Bacon.PushCollection
 import Reactive.Bacon.Merge
+import Reactive.Bacon.Monadic
 import Control.Applicative
+import Control.Concurrent
+import Control.Monad
 
 pushCollectionExample = do
   pc <- newPushCollection
@@ -78,6 +81,20 @@ disposeExample = do
   push messages "print me twice"
   dispose1
   push messages "print me once"
+
+monadExample = do
+  requests <- newPushCollection
+  let responses = (obs requests) >>= ajaxCall
+  responses ==> print
+  push requests "http://lol.com/lolServlet"
+
+ajaxCall :: String -> (Observable String)
+ajaxCall request = Observable $ \observer -> 
+                            do forkIO $ do
+                                  threadDelay 1000000
+                                  consume observer $ Next "404 - NOT FOUND"
+                                  void $ consume observer $ End
+                               return (return ())
 
 prefix p e = mapE((p ++) .show) e
 append :: [a] -> a -> [a]
