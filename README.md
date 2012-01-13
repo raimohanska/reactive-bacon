@@ -70,8 +70,8 @@ Status
 ------
 
 - Working Source instances for PushCollection and Lists
-- Simple transformers implemented: filterE, mapE, scanE, takeWhileE, takeE
-- Some combinators implemented: mergeE, combineLatestE
+- Simple transformers implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`
+- Some combinators implemented: `mergeE`, `combineLatestE`, `combineLatestWithE`
 
 Todo
 ----
