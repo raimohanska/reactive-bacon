@@ -20,7 +20,7 @@ Interfaces:
 
 - Functor
 - Applicative
-- (Monad not yet implemented)`
+- Monad
 - Num (yes, you can do `a` + `Observable a`!)
 
 Infix operators:
@@ -77,5 +77,4 @@ Todo
 ----
 
 - Add tests
-- Implement Monad interface
-- Study show to make |> work beautifully
+- Re-implement the rather hackish monadic and applicative interfaces
