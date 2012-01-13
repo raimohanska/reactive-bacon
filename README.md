@@ -11,6 +11,20 @@ Main concepts are:
 - `Source a`     : typeclass for things that can be converted into `Observable a`
 - Combinators    : transform and combile Observables with `mapE`, `filterE`, `scanE`, `mergeE` and `combineLatestE`
 
+Differences to RX:
+
+- Naming is more like Haskell/FP and less like SQL
+- No OnError event
+- Observer calls return observer state as in Iteratee. Makes it easier to implement combinators without explicit mutable state.
+
+Differences to reactive-banana:
+
+- No separate "build event network phase"
+- No Behavior/Discrete types. Just Observable (which is similar to Event in banana)
+- Easier to implement combinators
+- More combinators included
+- Monad and Applicative instances for Observable
+
 Included instances of `Source`:
 
 - Lists
@@ -73,8 +87,16 @@ Status
 - Simple transformers implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`
 - Some combinators implemented: `mergeE`, `combineLatestE`, `combineLatestWithE`
 
+Design considerations
+---------------------
+
+- Should I use the E suffix as in mapE? This is used to avoid conflict with Prelude functions
+- Might I dispose of the Dispose functionality? Would it be enough to be able to unsubscribe passively by returning NoMore? This would make the framework simpler. 
+
 Todo
 ----
 
 - Add tests
+- Implement zipE and zipWithE
+- Try it out in the RUMP project
 - Re-implement the rather hackish monadic and applicative interfaces
