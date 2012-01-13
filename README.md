@@ -11,6 +11,17 @@ Main concepts are:
 - `Source a`     : typeclass for things that can be converted into `Observable a`
 - Combinators    : transform and combile Observables with `mapE`, `filterE`, `scanE`, `mergeE` and `combineLatestE`
 
+Differences to RX:
+
+- Naming is more like Haskell/FP and less like SQL
+- Observer calls return observer state as in Iteratee. Makes it easier to implement combinators without explicit mutable state.
+
+Differences to reactive-banana:
+
+- No separate "build event network phase"
+- Easier to implement combinators
+- Lots of combinators included
+
 Included instances of `Source`:
 
 - Lists
