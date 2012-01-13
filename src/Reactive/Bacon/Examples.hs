@@ -39,9 +39,7 @@ combineLatestExample = do
   c1 <- newPushCollection
   c2 <- newPushCollection
   let combo = combineLatestE c1 c2
-  --eitherE c1 c2 ==> print
   takeE 2 combo ==> print
-  --combo ==> print
   push c1 "left"
   push c2 "right"
   push c1 "left2"
