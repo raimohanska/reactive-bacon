@@ -9,6 +9,7 @@ Main concepts are:
 - `Observable a` : a stream of events of type a
 - `Observer a`   : listener of events of type a
 - `Source a`     : typeclass for things that can be converted into `Observable a`
+- Combinators    : transform and combile Observables with `mapE`, `filterE`, `scanE`, `mergeE` and `combineLatestE`
 
 Included instances of `Source`:
 
@@ -63,14 +64,12 @@ Status
 ------
 
 - Working Source instances for PushCollection and Lists
-- Easiest combinators (filter, map) implemented
+- Simple transformers implemented: filterE, mapE, scanE, takeWhileE, takeE
+- Some combinators implemented: mergeE, combineLatestE
 
 Todo
 ----
 
-- Fix bugs
 - Add tests
-- Implement merge
-- Implement combineLatest+zip based on merge
-- Implement >>=
+- Implement Monad interface
 - Study show to make |> work beautifully
