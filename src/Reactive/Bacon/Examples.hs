@@ -83,16 +83,17 @@ disposeExample = do
   push messages "print me once"
 
 monadExample = do
-  requests <- newPushCollection
-  let responses = (obs requests) >>= ajaxCall
+  search <- newPushCollection
+  let responses = mapE ("http://lol.com/lolServlet?search=" ++) search >>= ajaxCall
   responses ==> print
-  push requests "http://lol.com/lolServlet"
+  push search "pron"
 
 ajaxCall :: String -> (Observable String)
 ajaxCall request = Observable $ \observer -> 
                             do forkIO $ do
+                                  putStrLn $ "Sending request " ++ request
                                   threadDelay 1000000
-                                  consume observer $ Next "404 - NOT FOUND"
+                                  consume observer $ Next $ "404 - NOT FOUND returned for " ++ request
                                   void $ consume observer $ End
                                return (return ())
 
