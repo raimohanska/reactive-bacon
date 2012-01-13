@@ -1,4 +1,4 @@
-module Reactive.Bacon.Merge where
+module Reactive.Bacon.Applicative where
 
 import Reactive.Bacon
 import Data.IORef
