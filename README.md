@@ -25,7 +25,7 @@ Interfaces:
 
 Infix operators:
 
-- `==>´ : assign side-effect
+- `==>` : assign side-effect
 - `|=>` : side-effect, return Dispose function for unsubscribing
 - `@?` : infix form of filterE
 
