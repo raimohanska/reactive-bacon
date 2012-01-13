@@ -26,7 +26,14 @@ applyE :: Source s1 => Source s2 => s1 (a -> b) -> s2 a -> Observable b
 applyE = combineLatestWithE ($) 
 
 mergeE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
-mergeE left right = Observable $ \observer -> do
+mergeE xs ys = sinkMap skipFirstEnd $ mergeRawE xs ys
+  where skipFirstEnd sink End   = return $ More $ sink
+        skipFirstEnd sink event = sink event
+
+
+-- Contains End events of both streams. Two ends means real end here :)
+mergeRawE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
+mergeRawE left right = Observable $ \observer -> do
   endLeftRef <- newIORef False
   endRightRef <- newIORef False
   switcherRef <- newIORef observer
@@ -57,7 +64,6 @@ mergeE left right = Observable $ \observer -> do
               dispose <- readIORef ref
               case dispose of Nothing -> return ()
                               Just f  -> f
-
 -- TODO: there's a gaping hole in disposeIfPossible logic
 
 combineLatestE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (a,b)
@@ -81,5 +87,6 @@ combineLatestE left right = sinkMap (combine 0 (Nothing) (Nothing)) (eitherE lef
 combineLatestWithE :: Source s1 => Source s2 => (a -> b -> c) -> s1 a -> s2 b -> Observable c
 combineLatestWithE f xs ys = mapE (\(a,b) -> f a b) (combineLatestE xs ys)
 
+-- Contains End events for both streams
 eitherE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (Either a b)
-eitherE left right = mergeE (mapE Left left) (mapE Right right)
+eitherE left right = mergeRawE (mapE Left left) (mapE Right right)

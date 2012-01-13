@@ -31,10 +31,23 @@ instance Functor Event where
   fmap f (Next a)  = Next (f a)
   fmap _ End       = End
 
+instance Show a => Show (Event a) where
+  show (Next x) = show x
+  show End      = "<END>"
+
+instance Eq a => Eq (Event a) where
+  (==) End End = True
+  (==) (Next x) (Next y) = (x==y)
+  (==) _ _ = False
+
+toEventObserver :: (Event a -> IO()) -> Observer a
+toEventObserver next = Observer sink
+  where sink event = next event >> return (More sink)
+
 toObserver :: (a -> IO()) -> Observer a
-toObserver next = Observer defaultHandler
-  where defaultHandler (Next x) = next x >> return (More defaultHandler)
-        defaultHandler End = return NoMore
+toObserver next = Observer sink
+  where sink (Next x) = next x >> return (More sink)
+        sink End = return NoMore
 
 observableList list = Observable subscribe 
   where subscribe (Observer sink) = feed sink list >> return (return ())
