@@ -9,10 +9,14 @@ import Control.Concurrent.MVar
 import Control.Concurrent(forkIO)
 import Control.Monad
 
-baconTests = TestList $ mergeTests
+baconTests = TestList $ mergeTests ++ takeWhileTests
 
 mergeTests = [
   eventTest "mergeE produces events from both + End" (mergeE [1, 2] [3, 4]) ([n 1, n 2, n 3, n 4, e])
+  ]
+
+takeWhileTests = [
+  eventTest "takeWhileE takes while condition is true" (takeWhileE (<3) [1, 2, 3, 1]) ([n 1, n 2, e])
   ]
 
 n = Next

@@ -76,7 +76,7 @@ takeWhileE :: Source s => (a -> Bool) -> s a -> Observable a
 takeWhileE f = sinkMap limitedSink
   where limitedSink sink End = sink End
         limitedSink sink (Next x) | f x  = mapOutput limitedSink sink (Next x)
-                                  | otherwise = return NoMore
+                                  | otherwise = sink End >> return NoMore
 
 takeE :: Source s => Int -> s a -> Observable a
 takeE 0 _   = getObservable []
