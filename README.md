@@ -96,7 +96,8 @@ Design considerations
 Todo
 ----
 
-- Add tests
+- Configure cabal test suite
 - Implement zipE and zipWithE
 - Try it out in the RUMP project
 - Re-implement the rather hackish monadic and applicative interfaces
+- Publish to Hackage :)
