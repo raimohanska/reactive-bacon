@@ -13,7 +13,7 @@ listExample = do
 
 pushCollectionMapFilterExample = do
   pc <- newPushCollection
-  mapE (("x=" ++) . show) (filterE (<3) pc) ==> print
+  mapE (("x=" ++) . show) (takeWhileE (<3) pc) ==> print
   push pc 1
   push pc 2
   push pc 3

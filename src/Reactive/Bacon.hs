@@ -52,14 +52,16 @@ mapE f = sinkMap mappedSink
 filterE :: Source s => (a -> Bool) -> s a -> Observable a
 filterE f = sinkMap filteredSink 
   where filteredSink sink End = sink End
-        filteredSink sink (Next x) | f x  = sink (Next x)
+        filteredSink sink (Next x) | f x  = sink (Next x) >>= return . convertResult
                                    | otherwise = return $ More (filteredSink sink)
+        convertResult = mapResult (More . filteredSink)
 
 takeWhileE :: Source s => (a -> Bool) -> s a -> Observable a
 takeWhileE f = sinkMap limitedSink
   where limitedSink sink End = sink End
-        limitedSink sink (Next x) | f x  = sink (Next x)
+        limitedSink sink (Next x) | f x  = sink (Next x) >>= return . convertResult
                                   | otherwise = return NoMore
+        convertResult = mapResult (More . limitedSink)
 
 takeE :: Source s => Int -> s a -> Observable a
 takeE 0 _   = getObservable []
