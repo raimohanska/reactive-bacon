@@ -68,9 +68,6 @@ takeE n src = sinkMap (limitedSink n) src
         convertResult 1 = \_ -> NoMore
         convertResult n = mapResult (More . (limitedSink (n-1))) 
 
-mergeE :: Source s => Source s2 => s a -> s2 a -> Observable a
-mergeE = undefined
-
 sinkMap :: Source s => (Sink b -> Sink a) -> s a -> Observable b
 sinkMap sinkMapper src = Observable $ subscribe'
   where subscribe' observer = subscribe (getObservable src) $ mappedObserver observer
