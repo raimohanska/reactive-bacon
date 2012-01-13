@@ -1,6 +1,8 @@
 reactive-bacon
 ==============
 
+CURRENT STATUS : BROKEN :(
+
 FRP (functional reactive programming) framework inspired by RX and Iteratee
 
 PushCollection GHCI example:
