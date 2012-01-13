@@ -82,7 +82,9 @@ takeE :: Source s => Int -> s a -> Observable a
 takeE 0 _   = getObservable []
 takeE n src = sinkMap (limitedSink n) src
   where limitedSink n sink End = sink End >> return NoMore
-        limitedSink 1 sink (Next x) = sink (Next x) >> sink End >> return NoMore
+        limitedSink 1 sink (Next x) = do 
+            result <- sink (Next x)
+            (toSink result) End
         limitedSink n sink (Next x) = sink (Next x) >>= return . mapResult (More . (limitedSink (n-1)))
 
 sinkMap :: Source s => (Sink b -> Sink a) -> s a -> Observable b
@@ -97,6 +99,10 @@ mapOutput mapper sink event = sink event >>= return . convertResult
 mapResult :: (Sink a -> HandleResult b) -> HandleResult a -> HandleResult b
 mapResult _ NoMore = NoMore
 mapResult f (More sink) = f sink
+
+toSink :: HandleResult a -> Sink a
+toSink NoMore = \_ -> return NoMore
+toSink (More sink) = sink
 
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
 (==>) src f = void $ subscribe (getObservable src) $ toObserver f
