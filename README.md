@@ -73,6 +73,12 @@ Status
 - Simple transformers implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`
 - Some combinators implemented: `mergeE`, `combineLatestE`, `combineLatestWithE`
 
+Design considerations
+---------------------
+
+- Should I use the E suffix as in mapE? This is used to avoid conflict with Prelude functions
+- Might I dispose of the Dispose functionality? Would it be enough to be able to unsubscribe passively by returning NoMore? This would make the framework simpler. 
+
 Todo
 ----
 
