@@ -93,7 +93,7 @@ mapResult f (More sink) = f sink
 (|=>) src f = subscribe (getObservable src) $ toObserver f
 
 (@?) :: Source s => s a -> (a -> Bool) -> Observable a
-(@?) src f = filterE f (getObservable src)
+(@?) src f = filterE f src
 
 (|>) = flip ($)
 
