@@ -97,4 +97,6 @@ Todo
 ----
 
 - Add tests
+- Implement zipE and zipWithE
+- Try it out in the RUMP project
 - Re-implement the rather hackish monadic and applicative interfaces
