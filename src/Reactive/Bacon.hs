@@ -59,7 +59,7 @@ takeWhileE :: Source s => (a -> Bool) -> s a -> Observable a
 takeWhileE f = sinkMap limitedSink
   where limitedSink sink End = sink End
         limitedSink sink (Next x) | f x  = sink (Next x)
-                                  | True = return NoMore
+                                  | otherwise = return NoMore
 
 takeE :: Source s => Int -> s a -> Observable a
 takeE 0 _   = getObservable []
@@ -68,6 +68,9 @@ takeE n src = sinkMap (limitedSink n) src
         limitedSink n sink (Next x) = sink (Next x) >>= return . (convertResult n)
         convertResult 1 = \_ -> NoMore
         convertResult n = mapResult (More . (limitedSink (n-1))) 
+
+mergeE :: Source s => Source s2 => s a -> s2 a -> Observable a
+mergeE = undefined
 
 sinkMap :: Source s => (Sink b -> Sink a) -> s a -> Observable b
 sinkMap sinkMapper src = Observable $ subscribe'

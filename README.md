@@ -16,8 +16,8 @@ PushCollection GHCI example:
 List example:
 
 ~~~ {.haskell}
-> import qualified Reactive.Bacon as B
-> B.takeWhile (<3) [1,2,3,4,1] ==> print
+> import Reactive.Bacon
+> takeWhileE (<3) [1,2,3,4,1] ==> print
 1
 2
 ~~~
@@ -27,3 +27,13 @@ Status
 
 - Working Source instances for PushCollection and Lists
 - Easiest combinators (filter, map) implemented
+
+Todo
+----
+
+- Fix bugs
+- Add tests
+- Implement merge
+- Implement combineLatest+zip based on merge
+- Implement >>=
+- Study show to make |> work beautifully
