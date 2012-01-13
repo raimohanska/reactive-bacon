@@ -84,12 +84,12 @@ disposeExample = do
 
 monadExample = do
   search <- newPushCollection
-  let responses = mapE ("http://lol.com/lolServlet?search=" ++) search >>= ajaxCall
+  let responses = mapE ("http://lol.com/lolServlet?search=" ++) search >>= httpCall
   responses ==> print
   push search "pron"
 
-ajaxCall :: String -> (Observable String)
-ajaxCall request = Observable $ \observer -> 
+httpCall :: String -> (Observable String)
+httpCall request = Observable $ \observer -> 
                             do forkIO $ do
                                   putStrLn $ "Sending request " ++ request
                                   threadDelay 1000000
