@@ -14,6 +14,7 @@ Main concepts are:
 Differences to RX:
 
 - Naming is more like Haskell/FP and less like SQL
+- No OnError event
 - Observer calls return observer state as in Iteratee. Makes it easier to implement combinators without explicit mutable state.
 
 Differences to reactive-banana:
