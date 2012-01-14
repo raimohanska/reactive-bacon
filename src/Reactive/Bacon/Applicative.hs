@@ -1,4 +1,4 @@
-module Reactive.Bacon.Applicative where
+module Reactive.Bacon.Applicative(combineLatestE, combineLatestWithE, mergeE) where
 
 import Reactive.Bacon
 import Data.IORef

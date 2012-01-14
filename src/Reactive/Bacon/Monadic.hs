@@ -1,4 +1,4 @@
-module Reactive.Bacon.Monadic where
+module Reactive.Bacon.Monadic(selectManyE) where
 
 import Data.IORef
 import Reactive.Bacon
