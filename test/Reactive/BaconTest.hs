@@ -10,7 +10,9 @@ import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
-  : monadTest : scanTest : timedTest : combineLatestTest : mergeTests ++ takeTests
+  : monadTest : scanTest : timedTest : combineLatestTest 
+  : takeUntilTest
+  : mergeTests ++ takeTests
 
 mergeTests = [
   eventTest "mergeE with cold observable" 
@@ -24,6 +26,10 @@ mergeTests = [
 timedTest = eventTest "timed source delivers" 
   (timed [(0, "a"), (1, "b"), (0, "c")]) 
   [n "a", n "b", n "c", e]
+
+takeUntilTest = eventTest "takeUntil works"
+  (takeUntilE (timed [(0, "a"), (2, "b")]) (timed [(1, "stop")]))
+  [n "a", e]
 
 takeWhileTest = eventTest "takeWhileE takes while condition is true" 
   (takeWhileE (<3) [1, 2, 3, 1]) 

@@ -1,4 +1,4 @@
-module Reactive.Bacon.Applicative(combineLatestE, combineLatestWithE, mergeE) where
+module Reactive.Bacon.Applicative(combineLatestE, combineLatestWithE, mergeE, takeUntilE) where
 
 import Reactive.Bacon
 import Data.IORef
@@ -26,25 +26,24 @@ applyE :: Source s1 => Source s2 => s1 (a -> b) -> s2 a -> Observable b
 applyE = combineLatestWithE ($) 
 
 mergeE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
-mergeE xs ys = sinkMap skipFirstEnd $ mergeRawE xs ys
-  where skipFirstEnd sink End   = return $ More $ sink
-        skipFirstEnd sink event = sink event >>= return . mapResult (More . skipFirstEnd)
+mergeE xs ys = mapE simplify $ eitherE xs ys
+   where simplify (Right x) = x
+         simplify (Left x)  = x
 
--- Contains End events of both streams. Two ends means real end here :)
-mergeRawE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
+mergeRawE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (Either (Event a) (Event b))
 mergeRawE left right = Observable $ \observer -> do
   switcherRef <- newIORef observer
   disposeRightHolder <- newIORef Nothing
-  disposeLeft <- subscribe (getObservable left) (Observer $ barrier switcherRef (disposeIfPossible disposeRightHolder))
-  disposeRight <- subscribe (getObservable right) (Observer $ barrier switcherRef disposeLeft)
+  disposeLeft <- subscribe (getObservable left) (Observer $ barrier Left switcherRef (disposeIfPossible disposeRightHolder))
+  disposeRight <- subscribe (getObservable right) (Observer $ barrier Right switcherRef disposeLeft)
   writeIORef disposeRightHolder (Just disposeRight)
   return $ disposeLeft >> disposeRight
-    where barrier switcher disposeOther event = do
-              result <- sinkSwitched switcher event
+    where barrier mapping switcher disposeOther event = do
+              result <- sinkSwitched switcher $ Next (mapping event)
               case result of
                  More newSink -> do
                     writeIORef switcher (Observer newSink)
-                    return $ More (barrier switcher disposeOther)
+                    return $ More (barrier mapping switcher disposeOther)
                  NoMore   -> do
                     disposeOther
                     return NoMore
@@ -75,6 +74,17 @@ combineLatestE left right = sinkMap (combine (Nothing) (Nothing)) (eitherE left 
 combineLatestWithE :: Source s1 => Source s2 => (a -> b -> c) -> s1 a -> s2 b -> Observable c
 combineLatestWithE f xs ys = mapE (\(a,b) -> f a b) (combineLatestE xs ys)
 
--- Contains End events for both streams
+takeUntilE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable a
+takeUntilE src stopper = undefined -- TODO: needs to stop on (src End) but ignore (stopper End)!
+
 eitherE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (Either a b)
-eitherE left right = mergeE (mapE Left left) (mapE Right right)
+eitherE left right = sinkMap skipFirstEnd $ mergeRawE left right
+  where skipFirstEnd sink event | isEnd event = return $ More $ mapEnd sink
+                                | otherwise   = send sink skipFirstEnd event
+        mapEnd sink event | isEnd event = sink End >> return NoMore
+                          | otherwise   = send sink mapEnd event 
+        send sink mapper (Next (Right (Next x))) = sink (Next (Right x)) >>= return . mapResult (More . mapper)
+        send sink mapper (Next (Left (Next x))) = sink (Next (Left x)) >>= return . mapResult (More . mapper)
+        isEnd (Next (Right End)) = True
+        isEnd (Next (Left End))  = True
+        isEnd _                  = False
