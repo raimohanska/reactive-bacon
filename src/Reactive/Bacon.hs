@@ -104,6 +104,9 @@ toSink :: HandleResult a -> Sink a
 toSink NoMore = \_ -> return NoMore
 toSink (More sink) = sink
 
+(===>) :: Source s => s a -> (Event a -> IO()) -> IO()
+(===>) src f = void $ subscribe (getObservable src) $ toEventObserver f
+
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
 (==>) src f = void $ subscribe (getObservable src) $ toObserver f
 

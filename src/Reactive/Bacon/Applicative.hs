@@ -28,33 +28,23 @@ applyE = combineLatestWithE ($)
 mergeE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
 mergeE xs ys = sinkMap skipFirstEnd $ mergeRawE xs ys
   where skipFirstEnd sink End   = return $ More $ sink
-        skipFirstEnd sink event = sink event
-
+        skipFirstEnd sink event = sink event >>= return . mapResult (More . skipFirstEnd)
 
 -- Contains End events of both streams. Two ends means real end here :)
 mergeRawE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
 mergeRawE left right = Observable $ \observer -> do
-  -- TODO: apply STM for better reliability
-  endLeftRef <- newIORef False
-  endRightRef <- newIORef False
   switcherRef <- newIORef observer
   disposeRightHolder <- newIORef Nothing
-  disposeLeft <- subscribe (getObservable left) (Observer $ barrier endLeftRef endRightRef switcherRef (disposeIfPossible disposeRightHolder))
-  disposeRight <- subscribe (getObservable right) (Observer $ barrier endRightRef endLeftRef switcherRef disposeLeft)
+  disposeLeft <- subscribe (getObservable left) (Observer $ barrier switcherRef (disposeIfPossible disposeRightHolder))
+  disposeRight <- subscribe (getObservable right) (Observer $ barrier switcherRef disposeLeft)
   writeIORef disposeRightHolder (Just disposeRight)
   return $ disposeLeft >> disposeRight
-    where barrier myFlag otherFlag switcher _ End = do 
-              writeIORef myFlag True
-              otherDone <- readIORef otherFlag
-              if otherDone
-                 then sinkSwitched switcher End
-                 else return NoMore
-          barrier myFlag otherFlag switcher disposeOther event = do
+    where barrier switcher disposeOther event = do
               result <- sinkSwitched switcher event
               case result of
                  More newSink -> do
                     writeIORef switcher (Observer newSink)
-                    return $ More (barrier myFlag otherFlag switcher disposeOther)
+                    return $ More (barrier switcher disposeOther)
                  NoMore   -> do
                     disposeOther
                     return NoMore
@@ -63,9 +53,8 @@ mergeRawE left right = Observable $ \observer -> do
               consume observer event
           disposeIfPossible ref = do
               dispose <- readIORef ref
-              case dispose of Nothing -> return ()
+              case dispose of Nothing -> return () -- TODO: is it necessary to dispose later in this case?
                               Just f  -> f
--- TODO: there's a gaping hole in disposeIfPossible logic
 
 combineLatestE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (a,b)
 combineLatestE left right = sinkMap (combine (Nothing) (Nothing)) (eitherE left right)
