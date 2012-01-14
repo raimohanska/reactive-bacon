@@ -10,24 +10,37 @@ import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
-  : scanTest : timedTest : combineLatestTest : mergeTests ++ takeTests
+  : monadTest : scanTest : timedTest : combineLatestTest : mergeTests ++ takeTests
 
 mergeTests = [
-  eventTest "mergeE with cold observable" (mergeE [1, 2] [3, 4]) ([n 1, n 2, n 3, n 4, e])
-  ,eventTest "mergeE with hot observable" (mergeE (timed [(0, "1"), (1, "2")]) (timed [(2, "3"), (1, "4")])) ([n "1", n "2", n "3", n "4", e])
+  eventTest "mergeE with cold observable" 
+    (mergeE [1, 2] [3, 4]) 
+    ([n 1, n 2, n 3, n 4, e])
+  ,eventTest "mergeE with hot observable" 
+    (mergeE (timed [(0, "1"), (1, "2")]) (timed [(2, "3"), (1, "4")])) 
+    ([n "1", n "2", n "3", n "4", e])
   ]
 
-timedTest = eventTest "timed source delivers" (timed [(0, "a"), (1, "b"), (0, "c")]) [n "a", n "b", n "c", e]
+timedTest = eventTest "timed source delivers" 
+  (timed [(0, "a"), (1, "b"), (0, "c")]) 
+  [n "a", n "b", n "c", e]
 
-takeWhileTest = eventTest "takeWhileE takes while condition is true" (takeWhileE (<3) [1, 2, 3, 1]) ([n 1, n 2, e])
+takeWhileTest = eventTest "takeWhileE takes while condition is true" 
+  (takeWhileE (<3) [1, 2, 3, 1]) 
+  [n 1, n 2, e]
 
-filterTest = eventTest "filterE filters" (filterE (<3) [1, 2, 3, 1]) ([n 1, n 2, n 1, e])
+filterTest = eventTest "filterE filters" 
+  (filterE (<3) [1, 2, 3, 1]) ([n 1, n 2, n 1, e])
 
 mapTest = eventTest "mapE maps" (mapE (+1) [1, 2]) ([n 2, n 3, e])
 
 scanTest = eventTest "scanE scans" (scanE (+) 0 [1, 2]) ([n 1, n 3, e])
 
 combineLatestTest = eventTest "combineLatest combines" (combineLatestE (timed [(0, "a1")]) (timed [(1, "b1"), (1, "b2")])) [n ("a1", "b1"), n ("a1", "b2"), e]
+
+monadTest = eventTest ">>= collects all events from substreams"
+  (obs [1, 2, 3] >>= \n -> timed [(n, n)])
+  [n 1, n 2, n 3, e]
 
 takeTests = [
   eventTest "takeE takes N first events" (takeE 3 [1, 2, 3, 1]) ([n 1, n 2, n 3, e])
