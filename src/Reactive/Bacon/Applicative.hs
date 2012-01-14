@@ -75,7 +75,11 @@ combineLatestWithE :: Source s1 => Source s2 => (a -> b -> c) -> s1 a -> s2 b ->
 combineLatestWithE f xs ys = mapE (\(a,b) -> f a b) (combineLatestE xs ys)
 
 takeUntilE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable a
-takeUntilE src stopper = undefined -- TODO: needs to stop on (src End) but ignore (stopper End)!
+takeUntilE src stopper = sinkMap takeUntil' $ mergeRawE src stopper
+  where takeUntil' sink (Next (Left (Next x)))  = sink (Next x) >>= return . mapResult (More . takeUntil')
+        takeUntil' sink (Next (Left End))       = sink End >> return NoMore
+        takeUntil' sink (Next (Right (Next x))) = sink End >> return NoMore
+        takeUntil' sink (Next (Right End))      = return $ More $ takeUntil' sink
 
 eitherE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (Either a b)
 eitherE left right = sinkMap skipFirstEnd $ mergeRawE left right
