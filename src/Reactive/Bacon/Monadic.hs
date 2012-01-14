@@ -14,7 +14,7 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
     state <- newTVarIO $ State sink Nothing 1 [] False
     dispose <- subscribe (obs xs) $ Observer $ mainEventSink state
     atomically $ modifyTVar state $ \state -> state { dispose = Just dispose }
-    return dispose
+    return $ disposeAll state
   where mainEventSink state eventA = do
             case eventA of
               End    -> do
