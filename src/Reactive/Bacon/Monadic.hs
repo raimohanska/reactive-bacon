@@ -49,10 +49,10 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
                                       atomically (modifyTVar state $ \s -> s { currentSink = sink})
                                       return (More $ childEventSink id state)
         disposeAll state = do
-              -- TODO: dispose all children too
-              maybeDispose <- withState state $ return . dispose
+              (maybeDispose, children) <- withState state $ \s -> return (dispose s, map snd (children s))
+              sequence_ children
               case maybeDispose of
-                  Nothing -> return () -- TODO should dispose later tjsp
+                  Nothing -> return () -- TODO should dispose later?
                   Just dispose -> dispose
         removeChild state id = state { children = filter (notId id) (children state) }
         notId removeId (id, _) = id /= removeId

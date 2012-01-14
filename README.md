@@ -96,10 +96,9 @@ Design considerations
 Todo
 ----
 
-- Tests for monadic interface (will require re-impl)
 - Configure cabal test suite
 - Implement zipE and zipWithE
 - Implement switch (using >>= and takeUntil)
 - Try it out in the RUMP project
-- Re-implement the rather hackish monadic and applicative interfaces
+- Re-implement the rather hackish mergeRawE implementation using STM
 - Publish to Hackage :)
