@@ -89,6 +89,8 @@ eitherE left right = sinkMap skipFirstEnd $ mergeRawE left right
                           | otherwise   = send sink mapEnd event 
         send sink mapper (Next (Right (Next x))) = sink (Next (Right x)) >>= return . mapResult (More . mapper)
         send sink mapper (Next (Left (Next x))) = sink (Next (Left x)) >>= return . mapResult (More . mapper)
-        isEnd (Next (Right End)) = True
-        isEnd (Next (Left End))  = True
-        isEnd _                  = False
+
+isEnd :: Event (Either (Event a) (Event b)) -> Bool
+isEnd (Next (Right End)) = True
+isEnd (Next (Left End))  = True
+isEnd _                  = False
