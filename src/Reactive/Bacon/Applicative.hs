@@ -34,6 +34,7 @@ mergeE xs ys = sinkMap skipFirstEnd $ mergeRawE xs ys
 -- Contains End events of both streams. Two ends means real end here :)
 mergeRawE :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
 mergeRawE left right = Observable $ \observer -> do
+  -- TODO: apply STM for better reliability
   endLeftRef <- newIORef False
   endRightRef <- newIORef False
   switcherRef <- newIORef observer
@@ -67,21 +68,19 @@ mergeRawE left right = Observable $ \observer -> do
 -- TODO: there's a gaping hole in disposeIfPossible logic
 
 combineLatestE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (a,b)
-combineLatestE left right = sinkMap (combine 0 (Nothing) (Nothing)) (eitherE left right)
-  where combine endCount leftVal rightVal sink event = do
-            let (endCount', leftVal', rightVal') = update endCount leftVal rightVal event
-            result <- output sink endCount' leftVal' rightVal' event 
-            return $ convertResult endCount' leftVal' rightVal' result
-        update endCount left right End              = (endCount+1, left   , right)
-        update endCount _    right (Next (Left x))  = (endCount  , Just x , right) 
-        update endCount left _     (Next (Right x)) = (endCount  , left   , Just x) 
-        output sink 2 _ _ _ = sink End >> return NoMore
-        output sink 1 _ _ End = sink End >> return NoMore
-        output sink 0 _ _ End = continueWith sink
-        output sink _ Nothing _ _ = continueWith sink
-        output sink _ _ Nothing _ = continueWith sink
-        output sink _ (Just l) (Just r) _  = sink $ Next (l, r)
-        convertResult endCount leftVal rightVal = mapResult (More . combine endCount leftVal rightVal)
+combineLatestE left right = sinkMap (combine (Nothing) (Nothing)) (eitherE left right)
+  where combine leftVal rightVal sink event = do
+            let (leftVal', rightVal') = update leftVal rightVal event
+            result <- output sink leftVal' rightVal' event 
+            return $ convertResult leftVal' rightVal' result
+        update left right End              = (left   , right)
+        update _    right (Next (Left x))  = (Just x , right) 
+        update left _     (Next (Right x)) = (left   , Just x) 
+        output sink _ _ End = sink End >> return NoMore
+        output sink Nothing _ _ = continueWith sink
+        output sink _ Nothing _ = continueWith sink
+        output sink (Just l) (Just r) _  = sink $ Next (l, r)
+        convertResult leftVal rightVal = mapResult (More . combine leftVal rightVal)
         continueWith sink = return $ More $ sink
 
 combineLatestWithE :: Source s1 => Source s2 => (a -> b -> c) -> s1 a -> s2 b -> Observable c
@@ -89,4 +88,4 @@ combineLatestWithE f xs ys = mapE (\(a,b) -> f a b) (combineLatestE xs ys)
 
 -- Contains End events for both streams
 eitherE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (Either a b)
-eitherE left right = mergeRawE (mapE Left left) (mapE Right right)
+eitherE left right = mergeE (mapE Left left) (mapE Right right)
