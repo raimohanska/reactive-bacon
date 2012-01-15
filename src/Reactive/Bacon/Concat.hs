@@ -23,3 +23,11 @@ concatE xs ys = Observable $ \(Observer sink) -> do
 repeatE :: Source s1 => s1 a -> Observable a
 repeatE xs = concatE xs (repeatE xs)
 
+startWithE :: Source s1 => a -> s1 a -> Observable a
+startWithE x xs = [x] <++> xs
+
+(<++>) :: Source s1 => Source s2 => s1 a -> s2 a -> Observable a
+(<++>) = concatE
+
+(<:>) :: Source s1 => a -> s1 a -> Observable a
+(<:>) = startWithE
