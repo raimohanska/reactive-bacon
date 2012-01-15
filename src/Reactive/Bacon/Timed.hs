@@ -3,6 +3,7 @@ module Reactive.Bacon.Timed where
 import Reactive.Bacon
 import Reactive.Bacon.IO
 import Reactive.Bacon.Concat
+import Reactive.Bacon.PushCollection
 import System.Time
 import Control.Concurrent(threadDelay, forkIO)
 import Control.Monad(void)

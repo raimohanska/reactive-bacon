@@ -1,4 +1,4 @@
-module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push) where
+module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push, publishE) where
 
 import Reactive.Bacon
 import Data.IORef
@@ -31,10 +31,23 @@ newPushCollection :: IO (PushCollection a)
 newPushCollection = liftM PushCollection (newIORef ([], 1))
 
 push :: PushCollection a -> a -> IO ()
-push (PushCollection listRef) item = do
+push pc item = pushEvent pc $ Next item
+
+pushEvent :: PushCollection a -> Event a -> IO ()
+pushEvent (PushCollection listRef) event = do
     (observers, _) <- readIORef listRef
-    mapM_  (applyTo item) observers
-  where applyTo item s@(Subscription observer _) = do result <- consume observer . Next $ item
-                                                      case result of
-                                                         More ob2 -> replaceObserver listRef s (Observer ob2)
-                                                         NoMore -> removeSubscription listRef s
+    mapM_  (applyTo event) observers
+  where applyTo event s@(Subscription observer _) = do 
+          result <- consume observer event
+          case result of
+             More ob2 -> replaceObserver listRef s (Observer ob2)
+             NoMore -> removeSubscription listRef s
+
+-- |Returns new Observable with a single, persistent connection to the wrapped observable
+-- Also returns Disposable for disconnecting from the source
+publishE :: Source s => s a -> IO (Observable a, Disposable)
+publishE src = do
+  pushCollection <- newPushCollection
+  dispose <- subscribe (obs src) $ toEventObserver $ (pushEvent pushCollection)
+  return (obs pushCollection, dispose)
+

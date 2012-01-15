@@ -16,9 +16,10 @@ import Control.Monad
 import qualified Data.Set as S
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
-  : switchTest : scanTest : timedTest : combineLatestTest 
-  : takeUntilTests ++ repeatTest : laterTest : periodicTest
-  : monadTests ++ concatTests ++ mergeTests ++ takeTests
+  : scanTest : timedTest : combineLatestTest 
+  : repeatTest : laterTest : periodicTest
+  : takeUntilTests ++ switchTests 
+  ++ monadTests ++ concatTests ++ mergeTests ++ takeTests
 
 concatTests = [
   eventTest "concatE with cold observable"
@@ -83,7 +84,6 @@ monadTests = [
   ,eventTest ">>= collects events from simultaneously returning substreams"
     ((obs [1, 2, 3]) >>= (later 2))
     (UnOrdered [1, 2, 3])
-  -- todo: fails
   ,eventTest ">>= collects events from cold sub-observables"
     ((obs [1, 2, 3]) >>= return)
     [n 1, n 2, n 3, e]
@@ -92,9 +92,14 @@ monadTests = [
     [n 1, n 2, n 3, e]
   ]
 
-switchTest = eventTest "switch switches"
-  (takeE 4 (timed [(0, "a"), (1, "b")] `switchE` (laterE (milliseconds (2 * delayMs)))))
-  [n "a", n "b", n "b", n "b"]
+switchTests = [ 
+  eventTest "switch switches between sub-observables on each new main event"
+    (takeE 4 ((timed [(0, "a"), (1, "b")]) `switchE` (later 2)))
+    [n "a", n "b", n "b", n "b"]
+  ,publishedEventTest "switch with hot observable"
+    (takeE 4 ((timed [(0, "a"), (1, "b")]) `switchE` (later 2)))
+    [n "a", n "b", n "b", n "b"]
+  ]
 
 takeTests = [
   eventTest "takeE takes N first events" (takeE 3 [1, 2, 3, 1]) ([n 1, n 2, n 3, e])
@@ -136,6 +141,13 @@ instance (Show a, Eq a, Ord a) => (EventSpec a) (UnOrdered a) where
       when ((S.fromList actualItems) /= (S.fromList expected)) $ assertEqual "incorrect events" expected actualItems
     where item End = []
           item (Next a) = [a]
+
+publishedEventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
+publishedEventTest label observable spec = TestLabel label $ TestCase $ do
+  (published, dispose) <- publishE observable
+  actual <- consumeAll published
+  verifyEvents spec actual
+  dispose
 
 eventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
 eventTest label observable spec = TestLabel label $ TestCase $ do
