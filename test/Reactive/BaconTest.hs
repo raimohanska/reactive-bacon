@@ -1,3 +1,5 @@
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FunctionalDependencies #-}
+
 module Reactive.BaconTest(baconTests) where
 
 import Test.HUnit
@@ -11,6 +13,7 @@ import Reactive.Bacon.Timed
 import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
+import qualified Data.Set as S
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
   : switchTest : scanTest : timedTest : combineLatestTest 
@@ -77,10 +80,9 @@ monadTests = [
   eventTest ">>= collects events from cold observable with hot sub-observables"
     (obs [1, 2, 3] >>= \n -> timed [(n, n)])
     [n 1, n 2, n 3, e]
-  -- todo: ignore ordering
   ,eventTest ">>= collects events from simultaneously returning substreams"
     ((obs [1, 2, 3]) >>= (later 2))
-    [n 1, n 2, n 3, e]
+    (UnOrdered [1, 2, 3])
   -- todo: fails
   ,eventTest ">>= collects events from cold sub-observables"
     ((obs [1, 2, 3]) >>= return)
@@ -101,7 +103,9 @@ takeTests = [
 
 n = Next
 e = End
+
 delayMs = 100
+
 timed :: [(Int, a)] -> Observable a
 timed events = Observable $ \observer -> do
     forkIO $ serve observer events
@@ -118,10 +122,25 @@ periodic delay value = periodicallyE (milliseconds $ delay * delayMs) value
 
 later delay value = laterE (milliseconds $ delay * delayMs) value
 
-eventTest :: Source s => Show a => Eq a => String -> s a -> [Event a] -> Test
-eventTest label observable expected = TestLabel label $ TestCase $ do
+class EventSpec a s | s -> a where
+  verifyEvents :: s -> [Event a] -> Assertion
+
+instance (Show a, Eq a) => (EventSpec a) [Event a] where
+  verifyEvents expected actual = assertEqual "incorrect events" expected actual
+
+data UnOrdered a = UnOrdered [a]
+
+instance (Show a, Eq a, Ord a) => (EventSpec a) (UnOrdered a) where
+  verifyEvents (UnOrdered expected) actualEvents = do
+      let actualItems = actualEvents >>= item
+      when ((S.fromList actualItems) /= (S.fromList expected)) $ assertEqual "incorrect events" expected actualItems
+    where item End = []
+          item (Next a) = [a]
+
+eventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
+eventTest label observable spec = TestLabel label $ TestCase $ do
   actual <- consumeAll observable
-  assertEqual "incorrect events" expected actual
+  verifyEvents spec actual
 
 consumeAll :: Source s => s a -> IO [Event a]
 consumeAll xs = do
