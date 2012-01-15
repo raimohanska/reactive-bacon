@@ -82,13 +82,12 @@ takeUntilE src stopper = sinkMap takeUntil' $ mergeRawE src stopper
         takeUntil' sink (Next (Right End))      = return $ More $ takeUntil' sink
 
 zipE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (a, b)
-zipE xs ys = sinkMap (zipSink [] [] False) (mergeRawE xs ys)
-  where zipSink _ _ True sink event | isEnd event        = sink End >> return NoMore
-        zipSink xs ys False sink event | isEnd event     = return $ More $ zipSink xs ys True sink
-        zipSink xs [] end sink (Next(Left(Next x)))      = return $ More $ zipSink (xs ++ [x]) [] end sink 
-        zipSink [] ys end sink (Next(Right(Next y)))     = return $ More $ zipSink [] (ys ++ [y]) end sink 
-        zipSink (x:xs) ys end sink (Next(Right(Next y))) = sink (Next (x, y)) >>= return . mapResult (More . zipSink xs ys end)
-        zipSink xs (y:ys) end sink (Next(Left(Next x)))  = sink (Next (x, y)) >>= return . mapResult (More . zipSink xs ys end)
+zipE xs ys = sinkMap (zipSink [] []) (eitherE xs ys)
+  where zipSink _ _ sink End                     = sink End >> return NoMore
+        zipSink xs [] sink (Next(Left(x)))       = return $ More $ zipSink (xs ++ [x]) [] sink 
+        zipSink [] ys sink (Next(Right(y)))      = return $ More $ zipSink [] (ys ++ [y]) sink 
+        zipSink (x:xs) ys sink (Next(Right(y)))  = sink (Next (x, y)) >>= return . mapResult (More . zipSink xs ys)
+        zipSink xs (y:ys) sink (Next(Left(x)))   = sink (Next (x, y)) >>= return . mapResult (More . zipSink xs ys)
 
 zipWithE :: Source s1 => Source s2 => (a -> b -> c) -> s1 a -> s2 b -> Observable c
 zipWithE f xs ys = mapE (\(a,b) -> f a b) (zipE xs ys)
