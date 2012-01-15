@@ -39,9 +39,12 @@ Interfaces:
 
 Infix operators:
 
-- `==>` : assign side-effect
+- `==>` : assign side-effect of type `a -> IO ()`
+- `===>` : assign side-effect of type `Event a -> IO ()`
 - `|=>` : side-effect, return Dispose function for unsubscribing
 - `@?` : infix form of filterE
+- `<++>` : concat two sources
+- `<:>` : prepend single element to stream
 
 PushCollection example:
 
@@ -86,8 +89,10 @@ Status
 ------
 
 - Working Source instances for PushCollection and Lists
-- Simple transformers implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`
-- Some combinators implemented: `mergeE`, `combineLatestE`, `combineLatestWithE`
+- Some combinators implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`, `mergeE`, `combineLatestE`, `combineLatestWithE`, `takeUntilE`, `publishE` etc
+- Applicative, Monad implemented
+- 27 test cases passing
+- Not tried out in "real life" yet
 
 Design considerations
 ---------------------
@@ -98,9 +103,10 @@ Design considerations
 Todo
 ----
 
-- Configure cabal test suite
 - Implement zipE and zipWithE
-- Implement switch (using >>= and takeUntil)
+- Introduce Sink class for easier side-effects
+- Documentation documentation documentation
+- Refactor into modules (core, combinators, num ..)
+- Configure cabal test suite
 - Try it out in the RUMP project
-- Re-implement the rather hackish mergeRawE implementation using STM
-- Publish to Hackage :)
+- Publish to Hackage
