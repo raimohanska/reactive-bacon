@@ -110,7 +110,7 @@ publishTests = [
   publishedEventTest "publish produces same results for hot observable"
     (timed [(1, "a"), (2, "b")])
     [n "a", n "b", e]
-  ,publishedEventTest "publish consumes a hot observable immediately"
+  ,publishedEventTest "publish consumes a cold observable immediately"
     ([1, 2, 3] <++> later 1 4)
     [n 4, e]
   ]
