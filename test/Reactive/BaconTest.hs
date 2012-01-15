@@ -18,7 +18,7 @@ import qualified Data.Set as S
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
   : scanTest : timedTest : combineLatestTest 
   : repeatTest : laterTest : periodicTest
-  : takeUntilTests ++ switchTests ++ publishTests
+  : takeUntilTests ++ switchTests ++ publishTests ++ zipTests
   ++ monadTests ++ concatTests ++ mergeTests ++ takeTests
 
 concatTests = [
@@ -76,6 +76,12 @@ mapTest = eventTest "mapE maps" (mapE (+1) [1, 2]) ([n 2, n 3, e])
 scanTest = eventTest "scanE scans" (scanE (+) 0 [1, 2]) ([n 1, n 3, e])
 
 combineLatestTest = eventTest "combineLatest combines" (combineLatestE (timed [(0, "a1")]) (timed [(1, "b1"), (1, "b2")])) [n ("a1", "b1"), n ("a1", "b2"), e]
+
+zipTests = [
+  eventTest "zipE zips lists"
+    (zipE [1,2,3] [4,5,6]) 
+    [n (1,4), n (2,5), n (3,6), e]
+  ]
 
 monadTests = [
   eventTest ">>= collects events from cold observable with hot sub-observables"
