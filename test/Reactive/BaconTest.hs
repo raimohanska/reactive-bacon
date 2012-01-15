@@ -81,6 +81,9 @@ zipTests = [
   eventTest "zipE zips lists"
     (zipE [1,2,3] [4,5,6]) 
     [n (1,4), n (2,5), n (3,6), e]
+  ,eventTest "zipE zips lists with hot observables"
+    (zipE [1,2,3] (timed [(0, 4), (1, 5), (1, 6)])) 
+    [n (1,4), n (2,5), n (3,6), e]
   ]
 
 monadTests = [
@@ -133,7 +136,7 @@ publishTests = [
 n = Next
 e = End
 
-delayMs = 100
+delayMs = 10
 
 timed :: [(Int, a)] -> Observable a
 timed events = Observable $ \observer -> do
