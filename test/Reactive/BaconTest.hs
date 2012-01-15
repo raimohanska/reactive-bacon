@@ -5,14 +5,28 @@ import Reactive.Bacon
 import Reactive.Bacon.Applicative
 import Reactive.Bacon.Monadic
 import Reactive.Bacon.PushCollection
+import Reactive.Bacon.Concat
 import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
   : monadTest : scanTest : timedTest : combineLatestTest 
-  : takeUntilTest
-  : mergeTests ++ takeTests
+  : takeUntilTest : repeatTest
+  : concatTests ++ mergeTests ++ takeTests
+
+concatTests = [
+  eventTest "concatE with cold observable"
+  (concatE [1, 2] [3, 4])
+  [n 1, n 2, n 3, n 4, e]
+  ,eventTest "concatE with hot observable"
+  (concatE (timed [(0, 1), (1, 2)]) (timed [(0, 3), (1, 4)]))
+  [n 1, n 2, n 3, n 4, e]
+  ]
+
+repeatTest = eventTest "repeat repeats indefinitely"
+  (takeE 5 $ repeatE [1, 2])
+  [n 1, n 2, n 1, n 2, n 1, e]
 
 mergeTests = [
   eventTest "mergeE with cold observable" 
