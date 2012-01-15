@@ -18,7 +18,7 @@ import qualified Data.Set as S
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
   : scanTest : timedTest : combineLatestTest 
   : repeatTest : laterTest : periodicTest
-  : takeUntilTests ++ switchTests 
+  : takeUntilTests ++ switchTests ++ publishTests
   ++ monadTests ++ concatTests ++ mergeTests ++ takeTests
 
 concatTests = [
@@ -104,6 +104,15 @@ switchTests = [
 takeTests = [
   eventTest "takeE takes N first events" (takeE 3 [1, 2, 3, 1]) ([n 1, n 2, n 3, e])
   ,eventTest "takeE ends if source ends" (takeE 3 [1, 2]) ([n 1, n 2, e])
+  ]
+
+publishTests = [
+  publishedEventTest "publish produces same results for hot observable"
+    (timed [(1, "a"), (2, "b")])
+    [n "a", n "b", e]
+  ,publishedEventTest "publish consumes a hot observable immediately"
+    ([1, 2, 3] <++> later 1 4)
+    [n 4, e]
   ]
 
 n = Next
