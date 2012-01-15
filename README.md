@@ -91,7 +91,7 @@ Status
 - Working Source instances for PushCollection and Lists
 - Some combinators implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`, `mergeE`, `combineLatestE`, `combineLatestWithE`, `zipE`, `zipWithE`, `takeUntilE`, `publishE` etc
 - Applicative, Monad implemented
-- 27 test cases passing
+- 29 test cases passing
 - Not tried out in "real life" yet
 
 Design considerations
@@ -103,6 +103,7 @@ Design considerations
 Todo
 ----
 
+- Implement delayE, throttleE, atFixedTime
 - Introduce Sink class for easier side-effects
 - Documentation documentation documentation
 - Refactor into modules (core, combinators, num ..)
