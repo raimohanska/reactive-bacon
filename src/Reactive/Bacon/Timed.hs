@@ -2,12 +2,16 @@ module Reactive.Bacon.Timed where
 
 import Reactive.Bacon
 import Reactive.Bacon.IO
+import Reactive.Bacon.Concat
 import System.Time
 import Control.Concurrent(threadDelay, forkIO)
 import Control.Monad(void)
 
 laterE :: TimeDiff -> a -> Observable a
 laterE diff x = fromIO $ threadDelay (toMicros diff) >> return x
+
+periodicallyE :: TimeDiff -> a -> Observable a
+periodicallyE diff x = repeatE (laterE diff x)
 
 toMicros :: TimeDiff -> Int
 toMicros diff = fromInteger((toPicos diff) `div` 1000000)

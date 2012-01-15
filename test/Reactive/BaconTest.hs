@@ -14,7 +14,7 @@ import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
   : monadTest : scanTest : timedTest : combineLatestTest 
-  : takeUntilTest : repeatTest : laterTest
+  : takeUntilTest : repeatTest : laterTest : periodicTest
   : concatTests ++ mergeTests ++ takeTests
 
 concatTests = [
@@ -32,6 +32,10 @@ repeatTest = eventTest "repeat repeats indefinitely"
 
 laterTest = eventTest "later returns single element later"
   (laterE (milliseconds 100) "lol")
+  [n "lol", n "lol", e]
+
+periodicTest = eventTest "periodic repeats single event periodically"
+  (takeE 2 $ periodicallyE (milliseconds 100) "lol")
   [n "lol", e]
 
 mergeTests = [
