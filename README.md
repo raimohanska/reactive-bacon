@@ -80,6 +80,8 @@ Numeric example:
 
 More [examples](https://github.com/raimohanska/reactive-bacon/blob/master/src/Reactive/Bacon/Examples.hs) available!
 
+See also [tests](https://github.com/raimohanska/reactive-bacon/blob/master/test/Reactive/BaconTest.hs).
+
 Status
 ------
 
