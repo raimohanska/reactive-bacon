@@ -93,12 +93,19 @@ monadTests = [
   ]
 
 switchTests = [ 
-  eventTest "switch switches between sub-observables on each new main event"
-    (takeE 4 ((timed [(0, "a"), (1, "b")]) `switchE` (later 2)))
-    [n "a", n "b", n "b", n "b"]
-  ,publishedEventTest "switch with hot observable"
-    (takeE 4 ((timed [(0, "a"), (1, "b")]) `switchE` (later 2)))
-    [n "a", n "b", n "b", n "b"]
+  eventTest "switch with cold observables is like >>="
+    ([1, 2, 3] `switchE` return)
+    [n 1, n 2, n 3, e]
+  ,eventTest "switch with cold observables & hot subs is empty"
+    ([1, 2, 3] `switchE` (later 1))
+    [e]
+  ,publishedEventTest "switch switches between sub-observables on each new main event"
+    (timed [(0, "a"), (1, "b"), (3, "c")])
+    (\src -> src `switchE` (later 2))
+    [n "b", n "c", e]
+  ,eventTest "doesn't work well for cold main observable, because is based on takeUntilE"
+    ((timed [(0, "a"), (1, "b"), (3, "c")]) `switchE` (later 2))
+    [e]
   ]
 
 takeTests = [
@@ -109,9 +116,11 @@ takeTests = [
 publishTests = [
   publishedEventTest "publish produces same results for hot observable"
     (timed [(1, "a"), (2, "b")])
+    id
     [n "a", n "b", e]
   ,publishedEventTest "publish consumes a cold observable immediately"
     ([1, 2, 3] <++> later 1 4)
+    id
     [n 4, e]
   ]
 
@@ -151,15 +160,17 @@ instance (Show a, Eq a, Ord a) => (EventSpec a) (UnOrdered a) where
     where item End = []
           item (Next a) = [a]
 
-publishedEventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
-publishedEventTest label observable spec = TestLabel label $ TestCase $ do
+--publishedEventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
+publishedEventTest label observable modifier spec = TestLabel label $ TestCase $ do
   (published, dispose) <- publishE observable
-  actual <- consumeAll published
-  verifyEvents spec actual
+  verifyObservable (modifier published) spec
   dispose
 
 eventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
 eventTest label observable spec = TestLabel label $ TestCase $ do
+  verifyObservable observable spec
+
+verifyObservable observable spec = do
   actual <- consumeAll observable
   verifyEvents spec actual
 
