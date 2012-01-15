@@ -14,8 +14,8 @@ fromIO action = Observable $ \(Observer sink) -> do
       case sink of
         Nothing -> return ()
         Just s -> do
-          s $ Next result
-          s $ End
+          s2 <- (s $ Next result) >>= return . toSink
+          s2 $ End
           return ()
     return $ writeIORef sinkRef Nothing
 

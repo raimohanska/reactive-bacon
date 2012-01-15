@@ -7,13 +7,14 @@ import Reactive.Bacon.Monadic
 import Reactive.Bacon.PushCollection
 import Reactive.Bacon.Concat
 import Reactive.Bacon.IO
+import Reactive.Bacon.Timed
 import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
   : monadTest : scanTest : timedTest : combineLatestTest 
-  : takeUntilTest : repeatTest
+  : takeUntilTest : repeatTest : laterTest
   : concatTests ++ mergeTests ++ takeTests
 
 concatTests = [
@@ -28,6 +29,10 @@ concatTests = [
 repeatTest = eventTest "repeat repeats indefinitely"
   (takeE 5 $ repeatE [1, 2])
   [n 1, n 2, n 1, n 2, n 1, e]
+
+laterTest = eventTest "later returns single element later"
+  (laterE (milliseconds 100) "lol")
+  [n "lol", e]
 
 mergeTests = [
   eventTest "mergeE with cold observable" 
