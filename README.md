@@ -78,7 +78,7 @@ Numeric example:
 125
 ~~~
 
-More [examples](src/Reactive/Bacon/Examples.hs) available!
+More [examples](https://github.com/raimohanska/reactive-bacon/blob/master/src/Reactive/Bacon/Examples.hs) available!
 
 Status
 ------
