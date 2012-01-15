@@ -13,9 +13,9 @@ import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
-  : monadTest : switchTest : scanTest : timedTest : combineLatestTest 
-  : takeUntilTest : repeatTest : laterTest : periodicTest
-  : concatTests ++ mergeTests ++ takeTests
+  : switchTest : scanTest : timedTest : combineLatestTest 
+  : takeUntilTests ++ repeatTest : laterTest : periodicTest
+  : monadTests ++ concatTests ++ mergeTests ++ takeTests
 
 concatTests = [
   eventTest "concatE with cold observable"
@@ -31,11 +31,11 @@ repeatTest = eventTest "repeat repeats indefinitely"
   [n 1, n 2, n 1, n 2, n 1, e]
 
 laterTest = eventTest "later returns single element later"
-  (laterE (milliseconds 100) "lol")
+  (laterE (milliseconds delayMs) "lol")
   [n "lol", e]
 
 periodicTest = eventTest "periodic repeats single event periodically"
-  (takeE 2 $ periodicallyE (milliseconds 100) "lol")
+  (takeE 2 $ periodicallyE (milliseconds delayMs) "lol")
   [n "lol", n "lol", e]
 
 mergeTests = [
@@ -51,9 +51,14 @@ timedTest = eventTest "timed source delivers"
   (timed [(0, "a"), (1, "b"), (0, "c")]) 
   [n "a", n "b", n "c", e]
 
-takeUntilTest = eventTest "takeUntil works"
-  (takeUntilE (timed [(0, "a"), (2, "b")]) (timed [(1, "stop")]))
-  [n "a", e]
+takeUntilTests = [ 
+  eventTest "takeUntil with bounded input"
+    (takeUntilE (timed [(0, "a"), (2, "b")]) (timed [(1, "stop")]))
+    [n "a", e]
+  ,eventTest "takeUntil with endless input"
+    (takeUntilE (periodic 2 "a") (periodic 5 "stop")) 
+    [n "a", n "a", e]
+  ]
 
 takeWhileTest = eventTest "takeWhileE takes while condition is true" 
   (takeWhileE (<3) [1, 2, 3, 1]) 
@@ -68,9 +73,22 @@ scanTest = eventTest "scanE scans" (scanE (+) 0 [1, 2]) ([n 1, n 3, e])
 
 combineLatestTest = eventTest "combineLatest combines" (combineLatestE (timed [(0, "a1")]) (timed [(1, "b1"), (1, "b2")])) [n ("a1", "b1"), n ("a1", "b2"), e]
 
-monadTest = eventTest ">>= collects all events from substreams"
-  (obs [1, 2, 3] >>= \n -> timed [(n, n)])
-  [n 1, n 2, n 3, e]
+monadTests = [
+  eventTest ">>= collects events from cold observable with hot sub-observables"
+    (obs [1, 2, 3] >>= \n -> timed [(n, n)])
+    [n 1, n 2, n 3, e]
+  -- todo: ignore ordering
+  ,eventTest ">>= collects events from simultaneously returning substreams"
+    ((obs [1, 2, 3]) >>= (later 2))
+    [n 1, n 2, n 3, e]
+  -- todo: fails
+  ,eventTest ">>= collects events from cold sub-observables"
+    ((obs [1, 2, 3]) >>= return)
+    [n 1, n 2, n 3, e]
+  ,eventTest ">>= collects events from hot observable with hot sub-observables"
+    ((timed [(0, 1), (1, 2), (1, 3)]) >>= (later 2))
+    [n 1, n 2, n 3, e]
+  ]
 
 switchTest = eventTest "switch switches"
   (takeE 4 (timed [(0, "a"), (1, "b")] `switchE` (laterE (milliseconds (2 * delayMs)))))
@@ -95,6 +113,10 @@ timed events = Observable $ \observer -> do
           case result of
             NoMore -> return ()
             More sink -> serve (Observer sink) events
+
+periodic delay value = periodicallyE (milliseconds $ delay * delayMs) value
+
+later delay value = laterE (milliseconds $ delay * delayMs) value
 
 eventTest :: Source s => Show a => Eq a => String -> s a -> [Event a] -> Test
 eventTest label observable expected = TestLabel label $ TestCase $ do
