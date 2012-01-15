@@ -12,7 +12,7 @@ instance Monad Observable where
 
 selectManyE :: Source s => s a -> (a -> Observable b) -> Observable b
 selectManyE xs binder = Observable $ \(Observer sink) -> do
-    state <- newTVarIO $ State sink Nothing 1 [] False
+    state <- newTVarIO $ State sink Nothing 1 [] [] False
     dispose <- subscribe (obs xs) $ Observer $ mainEventSink state
     atomically $ modifyTVar state $ \state -> state { dispose = Just dispose }
     return $ disposeAll state
@@ -21,15 +21,17 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
               End    -> do
                 (end, sink) <- withState state $ \s -> do
                     modifyTVar state $ \s -> s { mainEnded = True }
-                    return (null (children s), currentSink s)
+                    return (null (childIds s), currentSink s)
                 when end $ void $ sink End
                 return NoMore
               Next x -> do
                 id <- withState state $ \s -> do
-                  writeTVar state $ s { counter = (counter s + 1) }
-                  return $ counter s
+                  let id = counter s
+                  writeTVar state $ s { counter = (counter s + 1), childIds = id : (childIds s) }
+                  return id
                 child <- subscribe (binder x) $ Observer $ childEventSink id state
-                atomically $ modifyTVar state $ \s -> s { children = ((id, child) : children s) }
+  -- with cold child, this is too late to add ref
+                atomically $ modifyTVar state $ \s -> s { childDisposables = (child : childDisposables s) }
                 return $ More $ mainEventSink state
         childEventSink id state = \eventB -> do
                           case eventB of
@@ -37,7 +39,7 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
                                 (end, sink) <- withState state $ \s -> do
                                   let newState = removeChild s id
                                   writeTVar state newState
-                                  let end = (null (children newState) && mainEnded newState)
+                                  let end = (null (childIds newState) && mainEnded newState)
                                   return (end, currentSink newState)
                                 when end $ void $ sink End
                                 return NoMore 
@@ -50,13 +52,12 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
                                       atomically (modifyTVar state $ \s -> s { currentSink = sink})
                                       return (More $ childEventSink id state)
         disposeAll state = do
-              (maybeDispose, children) <- withState state $ \s -> return (dispose s, map snd (children s))
+              (maybeDispose, children) <- withState state $ \s -> return (dispose s, childDisposables s)
               sequence_ children
               case maybeDispose of
                   Nothing -> return () -- TODO should dispose later?
                   Just dispose -> dispose
-        removeChild state id = state { children = filter (notId id) (children state) }
-        notId removeId (id, _) = id /= removeId
+        removeChild state id = state { childIds = filter (/= id) (childIds state) }
         withState state action = atomically (readTVar state >>= action)
 
 switchE :: Source s => s a -> (a -> Observable b) -> Observable b
@@ -65,7 +66,8 @@ switchE src binder = (obs src) >>= (`takeUntilE` src) . binder
 data State a = State { currentSink :: Sink a, 
                        dispose :: Maybe Disposable,
                        counter :: Int,
-                       children :: [(Int, Disposable)],
+                       childIds :: [Int],
+                       childDisposables :: [Disposable],
                        mainEnded :: Bool }
 
 modifyTVar :: TVar a -> (a -> a) -> STM ()
