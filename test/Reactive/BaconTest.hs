@@ -13,7 +13,7 @@ import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
 
 baconTests = TestList $ takeWhileTest : filterTest : mapTest 
-  : monadTest : scanTest : timedTest : combineLatestTest 
+  : monadTest : switchTest : scanTest : timedTest : combineLatestTest 
   : takeUntilTest : repeatTest : laterTest : periodicTest
   : concatTests ++ mergeTests ++ takeTests
 
@@ -32,11 +32,11 @@ repeatTest = eventTest "repeat repeats indefinitely"
 
 laterTest = eventTest "later returns single element later"
   (laterE (milliseconds 100) "lol")
-  [n "lol", n "lol", e]
+  [n "lol", e]
 
 periodicTest = eventTest "periodic repeats single event periodically"
   (takeE 2 $ periodicallyE (milliseconds 100) "lol")
-  [n "lol", e]
+  [n "lol", n "lol", e]
 
 mergeTests = [
   eventTest "mergeE with cold observable" 
@@ -72,6 +72,10 @@ monadTest = eventTest ">>= collects all events from substreams"
   (obs [1, 2, 3] >>= \n -> timed [(n, n)])
   [n 1, n 2, n 3, e]
 
+switchTest = eventTest "switch switches"
+  (takeE 4 (timed [(0, "a"), (1, "b")] `switchE` (laterE (milliseconds (2 * delayMs)))))
+  [n "a", n "b", n "b", n "b"]
+
 takeTests = [
   eventTest "takeE takes N first events" (takeE 3 [1, 2, 3, 1]) ([n 1, n 2, n 3, e])
   ,eventTest "takeE ends if source ends" (takeE 3 [1, 2]) ([n 1, n 2, e])
@@ -79,13 +83,14 @@ takeTests = [
 
 n = Next
 e = End
+delayMs = 100
 timed :: [(Int, a)] -> Observable a
 timed events = Observable $ \observer -> do
     forkIO $ serve observer events
     return $ return ()
   where serve observer [] = consume observer End >> return ()
         serve observer ((delay, event) : events) = do
-          threadDelay $ delay * 100 * 1000
+          threadDelay $ delay * delayMs * 1000
           result <- consume observer $ Next event
           case result of
             NoMore -> return ()

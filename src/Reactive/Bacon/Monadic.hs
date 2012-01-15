@@ -1,7 +1,8 @@
-module Reactive.Bacon.Monadic(selectManyE) where
+module Reactive.Bacon.Monadic(selectManyE, switchE) where
 
 import Data.IORef
 import Reactive.Bacon
+import Reactive.Bacon.Applicative
 import Control.Concurrent.STM
 import Control.Monad
 
@@ -57,6 +58,9 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
         removeChild state id = state { children = filter (notId id) (children state) }
         notId removeId (id, _) = id /= removeId
         withState state action = atomically (readTVar state >>= action)
+
+switchE :: Source s => s a -> (a -> Observable b) -> Observable b
+switchE src binder = (obs src) >>= (`takeUntilE` src) . binder
 
 data State a = State { currentSink :: Sink a, 
                        dispose :: Maybe Disposable,
