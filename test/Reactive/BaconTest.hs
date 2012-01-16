@@ -20,7 +20,7 @@ baconTests = TestList $ takeWhileTest : filterTest : mapTest
   : repeatTest : laterTest : periodicTest
   : takeUntilTests ++ switchTests ++ publishTests ++ zipTests
   ++ monadTests ++ concatTests ++ mergeTests ++ takeTests
-  ++ delayTests
+  ++ delayTests ++ throttleTests
 
 concatTests = [
   eventTest "concatE with cold observable"
@@ -36,20 +36,27 @@ repeatTest = eventTest "repeat repeats indefinitely"
   [n 1, n 2, n 1, n 2, n 1, e]
 
 laterTest = eventTest "later returns single element later"
-  (laterE (milliseconds delayMs) "lol")
+  (laterE (units 1) "lol")
   [n "lol", e]
 
 delayTests = [
   eventTest "delay returns same elements"
-    (delayE (milliseconds $ delayMs * 1) [1, 2, 3])
+    (delayE (units 1) [1, 2, 3])
     [n 1, n 2, n 3, e]
   ,eventTest "elements are delayed"
-    (takeUntilE (delayE (milliseconds $ delayMs * 2) $ timed [(0, 1), (1, 2), (2, 3)]) (later 4 ["stop"]))
+    (takeUntilE (delayE (units 2) $ timed [(0, 1), (1, 2), (2, 3)]) (later 4 ["stop"]))
     [n 1, n 2, e]
   ]
 
+throttleTests = [
+  publishedEventTest "throttle throttles"
+    (timed [(0, 1), (1, 2), (3, 3), (1, 4), (1, 5)])
+    (throttleE (units 2))
+    [n 2, n 5, e] 
+  ]
+
 periodicTest = eventTest "periodic repeats single event periodically"
-  (takeE 2 $ periodicallyE (milliseconds delayMs) "lol")
+  (takeE 2 $ periodicallyE (units 1) "lol")
   [n "lol", n "lol", e]
 
 mergeTests = [
@@ -160,9 +167,11 @@ timed events = Observable $ \observer -> do
             NoMore -> return ()
             More sink -> serve (Observer sink) events
 
-periodic delay value = periodicallyE (milliseconds $ delay * delayMs) value
+periodic delay value = periodicallyE (units delay) value
 
-later delay value = laterE (milliseconds $ delay * delayMs) value
+later delay value = laterE (units delay) value
+
+units delay = milliseconds $ delay * delayMs
 
 class EventSpec a s | s -> a where
   verifyEvents :: s -> [Event a] -> Assertion
@@ -179,7 +188,9 @@ instance (Show a, Eq a, Ord a) => (EventSpec a) (UnOrdered a) where
     where item End = []
           item (Next a) = [a]
 
---publishedEventTest :: EventSpec a sp => Source s => Show a => Eq a => String -> s a -> sp -> Test
+-- | creates a published observable, applies given mapping to that, then
+-- tests it. Why? to simulate a real-life hot observable that doesn't
+-- spit out a new stream of events for each observer
 publishedEventTest label observable modifier spec = TestLabel label $ TestCase $ do
   (published, dispose) <- publishE observable
   verifyObservable (modifier published) spec

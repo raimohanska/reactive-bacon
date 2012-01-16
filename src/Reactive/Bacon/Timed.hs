@@ -4,6 +4,7 @@ import Reactive.Bacon
 import Reactive.Bacon.IO
 import Reactive.Bacon.Concat
 import Reactive.Bacon.PushCollection
+import Reactive.Bacon.Monadic
 import System.Time
 import Control.Concurrent(threadDelay, forkIO)
 import Control.Monad(void)
@@ -16,6 +17,9 @@ periodicallyE diff x = repeatE (laterE diff x)
 
 delayE :: Source s => TimeDiff -> s a -> Observable a
 delayE diff xs = obs xs >>= laterE diff
+
+throttleE :: Source s => TimeDiff -> s a -> Observable a
+throttleE diff xs = obs xs `switchE` laterE diff
 
 toMicros :: TimeDiff -> Int
 toMicros diff = fromInteger((toPicos diff) `div` 1000000)
