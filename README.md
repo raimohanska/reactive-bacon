@@ -1,7 +1,7 @@
 reactive-bacon
 ==============
 
-FRP (functional reactive programming) framework inspired by RX and Iteratee. 
+FRP (functional reactive programming) framework inspired by RX, reactive-banana and Iteratee. 
 
 Main concepts are:
 
@@ -97,8 +97,21 @@ Status
 Design considerations
 ---------------------
 
-- Should I use the E suffix as in mapE? This is used to avoid conflict with Prelude functions
-- Might I dispose of the Dispose functionality? Would it be enough to be able to unsubscribe passively by returning NoMore? This would make the framework simpler. 
+The concepts of "hot observable" vs "cold observable" have caused us trouble 
+with RX. Cold observables (practically lists) may be used, for instance, to 
+add a start value to a hot observable, in a case that we are actually modeling
+a property, such as location or a textfield value. This is problemsome because
+a cold observable always spits its value to any new observer. A new
+observer might actually expect to get the latest position instead of a
+fixed one.
+
+I'm currently proposing a new abstraction `Property` for modeling
+a property that is actually a value as a function of time. A `Property`
+will always remember its latest value, so that new listeners will get
+the most up-to-date value to start with.
+
+In reactive-banana terms Observable and Property roughly correspond to Event
+and Discrete.
 
 Todo
 ----
