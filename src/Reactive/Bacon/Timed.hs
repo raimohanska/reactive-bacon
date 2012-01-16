@@ -21,6 +21,13 @@ delayE diff xs = obs xs >>= laterE diff
 throttleE :: Source s => TimeDiff -> s a -> Observable a
 throttleE diff xs = obs xs `switchE` laterE diff
 
+-- | create a published stream, starting after given delay,
+--   maintaining a single, persistent, connection to the given observable
+atFixedTime :: Source s => TimeDiff -> s a -> IO (Observable a)
+atFixedTime diff src = do
+  (published, _) <- publishE (delayE diff src)
+  return published
+
 toMicros :: TimeDiff -> Int
 toMicros diff = fromInteger((toPicos diff) `div` 1000000)
  where

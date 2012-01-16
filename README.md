@@ -103,7 +103,6 @@ Design considerations
 Todo
 ----
 
-- Implement throttleE, atFixedTime
 - Introduce Sink class for easier side-effects
 - Documentation documentation documentation
 - Refactor into modules (core, combinators, num ..)
