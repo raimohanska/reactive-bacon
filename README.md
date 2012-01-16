@@ -122,3 +122,5 @@ Todo
 - Configure cabal test suite
 - Try it out in the RUMP project
 - Publish to Hackage
+- Create a Javascript version when the design is settled. RxJs needs an
+  open-source alternative.
