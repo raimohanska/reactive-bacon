@@ -18,6 +18,3 @@ fromIO action = Observable $ \(Observer sink) -> do
           s2 $ End
           return ()
     return $ writeIORef sinkRef Nothing
-
-monadicIO :: Source s => s a -> (a -> IO b) -> Observable b
-monadicIO xs binder = (obs xs) >>= fromIO . binder

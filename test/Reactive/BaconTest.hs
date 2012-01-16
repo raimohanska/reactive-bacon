@@ -20,6 +20,7 @@ baconTests = TestList $ takeWhileTest : filterTest : mapTest
   : repeatTest : laterTest : periodicTest
   : takeUntilTests ++ switchTests ++ publishTests ++ zipTests
   ++ monadTests ++ concatTests ++ mergeTests ++ takeTests
+  ++ delayTests
 
 concatTests = [
   eventTest "concatE with cold observable"
@@ -37,6 +38,15 @@ repeatTest = eventTest "repeat repeats indefinitely"
 laterTest = eventTest "later returns single element later"
   (laterE (milliseconds delayMs) "lol")
   [n "lol", e]
+
+delayTests = [
+  eventTest "delay returns same elements"
+    (delayE (milliseconds $ delayMs * 1) [1, 2, 3])
+    [n 1, n 2, n 3, e]
+  ,eventTest "elements are delayed"
+    (takeUntilE (delayE (milliseconds $ delayMs * 2) $ timed [(0, 1), (1, 2), (2, 3)]) (later 4 ["stop"]))
+    [n 1, n 2, e]
+  ]
 
 periodicTest = eventTest "periodic repeats single event periodically"
   (takeE 2 $ periodicallyE (milliseconds delayMs) "lol")

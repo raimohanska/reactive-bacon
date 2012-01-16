@@ -14,6 +14,9 @@ laterE diff x = fromIO $ threadDelay (toMicros diff) >> return x
 periodicallyE :: TimeDiff -> a -> Observable a
 periodicallyE diff x = repeatE (laterE diff x)
 
+delayE :: Source s => TimeDiff -> s a -> Observable a
+delayE diff xs = obs xs >>= laterE diff
+
 toMicros :: TimeDiff -> Int
 toMicros diff = fromInteger((toPicos diff) `div` 1000000)
  where

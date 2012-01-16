@@ -30,7 +30,6 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
                   writeTVar state $ s { counter = (counter s + 1), childIds = id : (childIds s) }
                   return id
                 child <- subscribe (binder x) $ Observer $ childEventSink id state
-  -- with cold child, this is too late to add ref
                 atomically $ modifyTVar state $ \s -> s { childDisposables = (child : childDisposables s) }
                 return $ More $ mainEventSink state
         childEventSink id state = \eventB -> do
