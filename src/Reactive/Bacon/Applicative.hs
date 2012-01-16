@@ -6,7 +6,7 @@ import Control.Monad
 import Control.Applicative
 
 instance Applicative Observable where
-  pure x = getObservable [x]
+  pure x = toObservable [x]
   (<*>) = applyE
 
 instance (Show a, Eq a, Num a) => Num (Observable a) where
@@ -14,7 +14,7 @@ instance (Show a, Eq a, Num a) => Num (Observable a) where
   (*) xs ys = (*) <$> xs <*> ys
   abs = fmap abs
   signum = fmap signum
-  fromInteger x = getObservable [fromInteger x]
+  fromInteger x = toObservable [fromInteger x]
 
 instance Show a => Show (Observable a) where
   show = const "Observable"
@@ -34,8 +34,8 @@ mergeRawE :: Source s1 => Source s2 => s1 a -> s2 b -> Observable (Either (Event
 mergeRawE left right = Observable $ \observer -> do
   switcherRef <- newIORef observer
   disposeRightHolder <- newIORef Nothing
-  disposeLeft <- subscribe (getObservable left) (Observer $ barrier Left switcherRef (disposeIfPossible disposeRightHolder))
-  disposeRight <- subscribe (getObservable right) (Observer $ barrier Right switcherRef disposeLeft)
+  disposeLeft <- subscribe (toObservable left) (Observer $ barrier Left switcherRef (disposeIfPossible disposeRightHolder))
+  disposeRight <- subscribe (toObservable right) (Observer $ barrier Right switcherRef disposeLeft)
   writeIORef disposeRightHolder (Just disposeRight)
   return $ disposeLeft >> disposeRight
     where barrier mapping switcher disposeOther event = do

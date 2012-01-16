@@ -7,7 +7,7 @@ import Control.Concurrent.STM
 import Control.Monad
 
 instance Monad Observable where
-  return x = getObservable [x]
+  return x = toObservable [x]
   (>>=) = selectManyE
 
 selectManyE :: Source s => s a -> (a -> Observable b) -> Observable b

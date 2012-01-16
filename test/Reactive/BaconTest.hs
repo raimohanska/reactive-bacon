@@ -207,7 +207,7 @@ verifyObservable observable spec = do
 consumeAll :: Source s => s a -> IO [Event a]
 consumeAll xs = do
     signal <- newEmptyMVar
-    forkIO $ void $ subscribe (getObservable xs) $ Observer $ collector signal []
+    forkIO $ void $ subscribe (toObservable xs) $ Observer $ collector signal []
     readMVar signal >>= return . reverse
   where collector signal es End   = putMVar signal (End : es) >> return NoMore
         collector signal es event = return $ More $ collector signal (event : es)

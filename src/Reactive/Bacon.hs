@@ -16,13 +16,13 @@ data Event a = Next a | End
 type Disposable = IO ()
 
 class Source s where
-  getObservable :: s a -> Observable a
+  toObservable :: s a -> Observable a
 
 instance Source Observable where
-  getObservable = id
+  toObservable = id
 
 instance Source [] where
-  getObservable = observableList
+  toObservable = observableList
 
 instance Functor Observable where
   fmap = mapE
@@ -79,7 +79,7 @@ takeWhileE f = sinkMap limitedSink
                                   | otherwise = sink End >> return NoMore
 
 takeE :: Source s => Int -> s a -> Observable a
-takeE 0 _   = getObservable []
+takeE 0 _   = toObservable []
 takeE n src = sinkMap (limitedSink n) src
   where limitedSink n sink End = sink End >> return NoMore
         limitedSink 1 sink (Next x) = do 
@@ -89,7 +89,7 @@ takeE n src = sinkMap (limitedSink n) src
 
 sinkMap :: Source s => (Sink b -> Sink a) -> s a -> Observable b
 sinkMap sinkMapper src = Observable $ subscribe'
-  where subscribe' observer = subscribe (getObservable src) $ mappedObserver observer
+  where subscribe' observer = subscribe (toObservable src) $ mappedObserver observer
         mappedObserver (Observer sink) = Observer $ sinkMapper sink
 
 mapOutput :: (Sink b -> Sink a) -> Sink b -> Event b -> IO (HandleResult a)
@@ -105,13 +105,13 @@ toSink NoMore = \_ -> return NoMore
 toSink (More sink) = sink
 
 (===>) :: Source s => s a -> (Event a -> IO()) -> IO()
-(===>) src f = void $ subscribe (getObservable src) $ toEventObserver f
+(===>) src f = void $ subscribe (toObservable src) $ toEventObserver f
 
 (==>) :: Source s => s a -> (a -> IO()) -> IO()
-(==>) src f = void $ subscribe (getObservable src) $ toObserver f
+(==>) src f = void $ subscribe (toObservable src) $ toObserver f
 
 (|=>) :: Source s => s a -> (a -> IO()) -> IO Disposable
-(|=>) src f = subscribe (getObservable src) $ toObserver f
+(|=>) src f = subscribe (toObservable src) $ toObserver f
 
 (@?) :: Source s => s a -> (a -> Bool) -> Observable a
 (@?) src f = filterE f src
@@ -119,4 +119,4 @@ toSink (More sink) = sink
 (|>) = flip ($)
 
 obs :: Source s => s a -> Observable a
-obs = getObservable
+obs = toObservable

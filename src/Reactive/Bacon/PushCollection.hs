@@ -11,7 +11,7 @@ instance Eq (Subscription q) where
 data PushCollection a = PushCollection (IORef ([Subscription a], Int))
 
 instance Source PushCollection where
-  getObservable collection = Observable (subscribePushCollection collection)
+  toObservable collection = Observable (subscribePushCollection collection)
 
 subscribePushCollection (PushCollection ref) observer = do
         (subscriptions, id) <- readIORef ref
