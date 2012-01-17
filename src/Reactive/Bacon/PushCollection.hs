@@ -1,4 +1,4 @@
-module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push, publishE) where
+module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push, pushEvent) where
 
 import Reactive.Bacon.Core
 import Data.IORef
@@ -12,21 +12,15 @@ data PushCollection a = PushCollection (IORef ([Subscription a], Int))
 
 instance Source PushCollection where
   toObservable collection = Observable (subscribePushCollection collection)
-
-subscribePushCollection (PushCollection ref) observer = do
-        (subscriptions, id) <- readIORef ref
-        let subscription = Subscription observer id
-        writeIORef ref $ (subscription : subscriptions, id+1) 
-        return (removeSubscription ref subscription)
+    where subscribePushCollection (PushCollection ref) observer = do
+            (subscriptions, id) <- readIORef ref
+            let subscription = Subscription observer id
+            writeIORef ref $ (subscription : subscriptions, id+1) 
+            return (removeSubscription ref subscription)
 
 removeSubscription ref s = modifyIORef ref removeSubscription'
     where removeSubscription' (observers, counter) = (filter (/= s) observers, counter)
 
-replaceObserver ref (Subscription _ id) newObserver = modifyIORef ref replaceObserver'
-    where replaceObserver' (subscriptions, counter) = (map replace subscriptions, counter)
-          replace s@(Subscription _ id2) | id2 == id = Subscription newObserver id
-                                         | otherwise = s
-  
 newPushCollection :: IO (PushCollection a)
 newPushCollection = liftM PushCollection (newIORef ([], 1))
 
@@ -42,12 +36,8 @@ pushEvent (PushCollection listRef) event = do
           case result of
              More ob2 -> replaceObserver listRef s (Observer ob2)
              NoMore -> removeSubscription listRef s
-
--- |Returns new Observable with a single, persistent connection to the wrapped observable
--- Also returns Disposable for disconnecting from the source
-publishE :: Source s => s a -> IO (Observable a, Disposable)
-publishE src = do
-  pushCollection <- newPushCollection
-  dispose <- subscribe (obs src) $ toEventObserver $ (pushEvent pushCollection)
-  return (obs pushCollection, dispose)
+        replaceObserver ref (Subscription _ id) newObserver = modifyIORef ref replaceObserver'
+            where replaceObserver' (subscriptions, counter) = (map replace subscriptions, counter)
+                  replace s@(Subscription _ id2) | id2 == id = Subscription newObserver id
+                                                 | otherwise = s
 

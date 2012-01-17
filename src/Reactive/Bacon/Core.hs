@@ -40,15 +40,6 @@ instance Eq a => Eq (Event a) where
   (==) (Next x) (Next y) = (x==y)
   (==) _ _ = False
 
-toEventObserver :: (Event a -> IO()) -> Observer a
-toEventObserver next = Observer sink
-  where sink event = next event >> return (More sink)
-
-toObserver :: (a -> IO()) -> Observer a
-toObserver next = Observer sink
-  where sink (Next x) = next x >> return (More sink)
-        sink End = return NoMore
-
 observableList list = Observable subscribe 
   where subscribe (Observer sink) = feed sink list >> return (return ())
         feed sink (x:xs) = do result <- sink $ Next x
@@ -104,19 +95,8 @@ toSink :: HandleResult a -> Sink a
 toSink NoMore = \_ -> return NoMore
 toSink (More sink) = sink
 
-(===>) :: Source s => s a -> (Event a -> IO()) -> IO()
-(===>) src f = void $ subscribe (toObservable src) $ toEventObserver f
-
-(==>) :: Source s => s a -> (a -> IO()) -> IO()
-(==>) src f = void $ subscribe (toObservable src) $ toObserver f
-
-(|=>) :: Source s => s a -> (a -> IO()) -> IO Disposable
-(|=>) src f = subscribe (toObservable src) $ toObserver f
-
 (@?) :: Source s => s a -> (a -> Bool) -> Observable a
 (@?) src f = filterE f src
-
-(|>) = flip ($)
 
 obs :: Source s => s a -> Observable a
 obs = toObservable

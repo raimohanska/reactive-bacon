@@ -4,6 +4,7 @@ module Reactive.Bacon (
   module Reactive.Bacon.Concat,
   module Reactive.Bacon.IO,
   module Reactive.Bacon.Monadic,
+  module Reactive.Bacon.Observable,
   module Reactive.Bacon.Timed
   ) where
   import Reactive.Bacon.Core
@@ -11,4 +12,5 @@ module Reactive.Bacon (
   import Reactive.Bacon.Concat
   import Reactive.Bacon.IO
   import Reactive.Bacon.Monadic
+  import Reactive.Bacon.Observable
   import Reactive.Bacon.Timed

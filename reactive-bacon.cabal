@@ -19,6 +19,7 @@ Library
                    Reactive.Bacon.Core,
                    Reactive.Bacon.IO,
                    Reactive.Bacon.Monadic,
+                   Reactive.Bacon.Observable,
                    Reactive.Bacon.PushCollection,
                    Reactive.Bacon.Timed
   Build-depends:

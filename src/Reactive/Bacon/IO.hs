@@ -4,6 +4,7 @@ import Reactive.Bacon.Core
 import Reactive.Bacon.Monadic
 import Data.IORef
 import Control.Concurrent(forkIO)
+import Control.Monad
 
 fromIO :: IO a -> Observable a
 fromIO action = Observable $ \(Observer sink) -> do
@@ -18,3 +19,4 @@ fromIO action = Observable $ \(Observer sink) -> do
           s2 $ End
           return ()
     return $ writeIORef sinkRef Nothing
+
