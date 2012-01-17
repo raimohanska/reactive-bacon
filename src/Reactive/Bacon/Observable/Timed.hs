@@ -1,10 +1,10 @@
-module Reactive.Bacon.Timed where
+module Reactive.Bacon.Observable.Timed where
 
 import Reactive.Bacon.Core
-import Reactive.Bacon.IO
-import Reactive.Bacon.Concat
+import Reactive.Bacon.Observable.IO
+import Reactive.Bacon.Observable.Concat
 import Reactive.Bacon.PushCollection
-import Reactive.Bacon.Monadic
+import Reactive.Bacon.Observable.Monadic
 import System.Time
 import Control.Concurrent(threadDelay, forkIO)
 import Control.Monad(void)

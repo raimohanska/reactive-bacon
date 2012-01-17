@@ -1,7 +1,8 @@
-module Reactive.Bacon.IO where
+module Reactive.Bacon.Observable.IO where
 
 import Reactive.Bacon.Core
-import Reactive.Bacon.Monadic
+import Reactive.Bacon.Observable.Monadic
+import Reactive.Bacon.Observable
 import Data.IORef
 import Control.Concurrent(forkIO)
 import Control.Monad

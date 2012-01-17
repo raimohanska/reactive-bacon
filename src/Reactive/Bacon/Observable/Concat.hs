@@ -1,6 +1,7 @@
-module Reactive.Bacon.Concat where
+module Reactive.Bacon.Observable.Concat where
 
 import Reactive.Bacon.Core
+import Reactive.Bacon.Observable
 
 import Data.IORef
 

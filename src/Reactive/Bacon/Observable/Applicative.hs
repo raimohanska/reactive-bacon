@@ -1,6 +1,7 @@
-module Reactive.Bacon.Applicative(combineLatestE, combineLatestWithE, zipE, zipWithE, mergeE, takeUntilE) where
+module Reactive.Bacon.Observable.Applicative(combineLatestE, combineLatestWithE, zipE, zipWithE, mergeE, takeUntilE) where
 
 import Reactive.Bacon.Core
+import Reactive.Bacon.Observable
 import Data.IORef
 import Control.Monad
 import Control.Applicative

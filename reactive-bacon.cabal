@@ -14,14 +14,15 @@ Cabal-version:       >=1.2
 Library
   hs-source-dirs: src
   Exposed-modules: Reactive.Bacon,
-                   Reactive.Bacon.Applicative,
-                   Reactive.Bacon.Concat,
+                   Reactive.Bacon.Observable.Applicative,
+                   Reactive.Bacon.Observable.Concat,
                    Reactive.Bacon.Core,
-                   Reactive.Bacon.IO,
-                   Reactive.Bacon.Monadic,
+                   Reactive.Bacon.Observable.IO,
+                   Reactive.Bacon.Observable.Monadic,
                    Reactive.Bacon.Observable,
+                   Reactive.Bacon.Observable.List,
                    Reactive.Bacon.PushCollection,
-                   Reactive.Bacon.Timed
+                   Reactive.Bacon.Observable.Timed
   Build-depends:
     base >= 4 && < 5,
     stm >= 2.2.0.1,

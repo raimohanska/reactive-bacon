@@ -1,8 +1,8 @@
-module Reactive.Bacon.Monadic(selectManyE, switchE) where
+module Reactive.Bacon.Observable.Monadic(selectManyE, switchE) where
 
 import Data.IORef
 import Reactive.Bacon.Core
-import Reactive.Bacon.Applicative
+import Reactive.Bacon.Observable.Applicative
 import Control.Concurrent.STM
 import Control.Monad
 
