@@ -116,10 +116,8 @@ and Discrete.
 Todo
 ----
 
-- Introduce Sink class for easier side-effects
+- Introduce Sink class for easier side-effects (?)
 - Documentation documentation documentation
-- Refactor into modules (core, combinators, num ..)
-- Configure cabal test suite
 - Try it out in the RUMP project
 - Publish to Hackage
 - Create a Javascript version when the design is settled. RxJs needs an
