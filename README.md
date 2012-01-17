@@ -36,14 +36,14 @@ Included instances of `Source`:
 
 Interfaces:
 
-- Functor : fmap = mapE
-- Applicative : based on combineLatestE. You can apply a pure function
+- `Functor` : `fmap` = `mapE`
+- `Applicative` : based on `combineLatestE`. You can apply a pure function
   to Observables using this interface
-- Monad : >>= spawns a new observable for each source event, then merges
+- `Monad` : `>>=` spawns a new observable for each source event, then merges
   the result events from spawned observables into the result stream
-- Num, based on Applicative. (Yes, you can do `a` + `Observable a`!)
-- Monoid : mempty = neverE, mappend = mergeE
-- Alternative : empty = neverE, <|> = mergeE
+- `Monoid` : `mempty` = `neverE`, `mappend` = `mergeE`
+- `Alternative` : `empty` = `neverE`, `<|>` = `mergeE`
+- `Num`, based on Applicative. (Yes, you can do `a` + `Observable a`!)
 
 Useful operators from typeclasses:
 
