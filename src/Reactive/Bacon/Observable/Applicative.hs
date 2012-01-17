@@ -4,11 +4,16 @@ import Reactive.Bacon.Core
 import Reactive.Bacon.Observable
 import Data.IORef
 import Control.Monad
+import Data.Monoid
 import Control.Applicative
 
 instance Applicative Observable where
   pure x = toObservable [x]
   (<*>) = applyE
+
+instance Monoid (Observable a) where
+  mempty = neverE
+  mappend = mergeE
 
 instance (Show a, Eq a, Num a) => Num (Observable a) where
   (+) xs ys = (+) <$> xs <*> ys
