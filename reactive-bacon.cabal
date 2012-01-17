@@ -1,14 +1,14 @@
 Name:                reactive-bacon
 Version:             0.1
-Synopsis:            FRP (functional reactive programming) framework inspired by RX, reactive-banana and Iteratee
+Synopsis:            FRP (functional reactive programming) framework
+Description:         FRP (functional reactive programming) framework inspired by RX, reactive-banana and Iteratee
 License:             BSD3
 License-file:        LICENSE
 Author:              Juha Paananen
 Maintainer:          juha.paananen@gmail.com
 Category:            Reactive
 Build-type:          Simple
-
-Cabal-version:       >=1.2
+Cabal-version:       >=1.10
 
 
 Library
@@ -27,6 +27,7 @@ Library
     base >= 4 && < 5,
     stm >= 2.2.0.1,
     old-time >= 1.0.0.6
+  default-language: Haskell2010
 
 Test-Suite tests
   hs-source-dirs: src, test
@@ -35,3 +36,7 @@ Test-Suite tests
   Build-depends:  base, HUnit >= 1.2.2.3, containers >= 0.4.0.0 
   ghc-options:    -threaded
   default-language: Haskell2010
+
+source-repository head
+  type: Git
+  location: https://github.com/raimohanska/reactive-bacon
