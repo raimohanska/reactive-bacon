@@ -1,7 +1,6 @@
 module Reactive.Bacon.Property where
 
 import Reactive.Bacon
-import Reactive.Bacon.Applicative
 import Control.Applicative
 
 -- | Reactive property. Differences from Observable:

@@ -2,12 +2,7 @@ module Reactive.BaconTest(baconTests) where
 
 import Test.HUnit
 import Reactive.Bacon
-import Reactive.Bacon.Applicative
-import Reactive.Bacon.Monadic
 import Reactive.Bacon.PushCollection
-import Reactive.Bacon.Concat
-import Reactive.Bacon.IO
-import Reactive.Bacon.Timed
 import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad

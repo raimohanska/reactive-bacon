@@ -1,6 +1,6 @@
 module Reactive.Bacon.IO where
 
-import Reactive.Bacon
+import Reactive.Bacon.Core
 import Reactive.Bacon.Monadic
 import Data.IORef
 import Control.Concurrent(forkIO)

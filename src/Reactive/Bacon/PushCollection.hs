@@ -1,6 +1,6 @@
 module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push, publishE) where
 
-import Reactive.Bacon
+import Reactive.Bacon.Core
 import Data.IORef
 import Control.Monad
 

@@ -1,6 +1,6 @@
 module Reactive.Bacon.Timed where
 
-import Reactive.Bacon
+import Reactive.Bacon.Core
 import Reactive.Bacon.IO
 import Reactive.Bacon.Concat
 import Reactive.Bacon.PushCollection
