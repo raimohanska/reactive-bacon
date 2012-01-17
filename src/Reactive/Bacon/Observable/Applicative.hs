@@ -15,6 +15,10 @@ instance Monoid (Observable a) where
   mempty = neverE
   mappend = mergeE
 
+instance Alternative Observable where
+  empty = neverE
+  (<|>) = mergeE
+
 instance (Show a, Eq a, Num a) => Num (Observable a) where
   (+) xs ys = (+) <$> xs <*> ys
   (*) xs ys = (*) <$> xs <*> ys

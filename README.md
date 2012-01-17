@@ -27,17 +27,31 @@ Differences to reactive-banana:
 
 Included instances of `Source`:
 
-- Lists
-- PushCollection
+- [] (Lists) : creates a "cold observable" that always spits the list
+  contents to new listeners
+- PushCollection : a "hot observable" where you can manually push new
+  data, which will be delivered to subscribers synchronously
+- IO : creates a "cold observable" that always executes the IO action on
+  subscribe
 
 Interfaces:
 
-- Functor
-- Applicative
-- Monad
-- Num (yes, you can do `a` + `Observable a`!)
+- Functor : fmap = mapE
+- Applicative : based on combineLatestE. You can apply a pure function
+  to Observables using this interface
+- Monad : >>= spawns a new observable for each source event, then merges
+  the result events from spawned observables into the result stream
+- Num, based on Applicative. (Yes, you can do `a` + `Observable a`!)
+- Monoid : mempty = neverE, mappend = mergeE
+- Alternative : empty = neverE, <|> = mergeE
 
-Infix operators:
+Useful operators from typeclasses:
+
+- `>>=` : monadic bind (spawn new observables, merge results)
+- `<|>` : merge
+- `<$>`, `<*>` : apply pure function as in `(+) <$> o1 <*> o2`
+
+Custom infix operators:
 
 - `==>` : assign side-effect of type `a -> IO ()`
 - `===>` : assign side-effect of type `Event a -> IO ()`
