@@ -83,7 +83,6 @@ Numeric example:
 
 ~~~ {.haskell}
 > import Reactive.Bacon
-> import Reactive.Bacon.Merge
 > xs <- newPushCollection
 > ys <- newPushCollection
 > let sum = 100 + (obs xs) * 10 + (obs ys)
@@ -99,14 +98,19 @@ More [examples](https://github.com/raimohanska/reactive-bacon/blob/master/src/Re
 
 See also [tests](https://github.com/raimohanska/reactive-bacon/blob/master/test/Reactive/BaconTest.hs).
 
+Building and using
+------------------
+
+Not on HackageDB yet, so you have to build it yourself. It's simple though: git clone, cabal install and it's there. You may now try it in GHCI, as in the examples above.
+
 Status
 ------
 
-- Working Source instances for PushCollection and Lists
-- Some combinators implemented: `filterE`, `mapE`, `scanE`, `takeWhileE`, `takeE`, `mergeE`, `combineLatestE`, `combineLatestWithE`, `zipE`, `zipWithE`, `takeUntilE`, `publishE` etc
-- Applicative, Monad implemented
-- 29 test cases passing
+- Observable with type class instances and plenty of combinators seem to
+  work
+- 32 test cases passing
 - Not tried out in "real life" yet
+- Not published on Hackage yet
 
 Design considerations
 ---------------------

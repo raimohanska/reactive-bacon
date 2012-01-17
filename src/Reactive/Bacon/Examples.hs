@@ -1,6 +1,7 @@
 module Reactive.Bacon.Examples where
 
 import Reactive.Bacon
+import Reactive.Bacon.PushCollection
 import Control.Applicative
 import Control.Concurrent
 import Control.Monad
