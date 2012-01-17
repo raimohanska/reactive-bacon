@@ -10,7 +10,7 @@ import Control.Concurrent(threadDelay, forkIO)
 import Control.Monad(void)
 
 laterE :: TimeDiff -> a -> Observable a
-laterE diff x = fromIO $ threadDelay (toMicros diff) >> return x
+laterE diff x = toObservable $ threadDelay (toMicros diff) >> return x
 
 periodicallyE :: TimeDiff -> a -> Observable a
 periodicallyE diff x = repeatE (laterE diff x)

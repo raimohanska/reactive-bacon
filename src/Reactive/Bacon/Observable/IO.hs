@@ -1,4 +1,4 @@
-module Reactive.Bacon.Observable.IO where
+module Reactive.Bacon.Observable.IO() where
 
 import Reactive.Bacon.Core
 import Reactive.Bacon.Observable.Monadic
@@ -6,6 +6,9 @@ import Reactive.Bacon.Observable
 import Data.IORef
 import Control.Concurrent(forkIO)
 import Control.Monad
+
+instance Source IO where
+  toObservable = fromIO
 
 fromIO :: IO a -> Observable a
 fromIO action = Observable $ \(Observer sink) -> do
