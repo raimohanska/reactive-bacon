@@ -1,11 +1,14 @@
 Name:                reactive-bacon
 Version:             0.1
+Stability:           experimental
 Synopsis:            FRP (functional reactive programming) framework
 Description:         FRP (functional reactive programming) framework inspired by RX, reactive-banana and Iteratee
 License:             BSD3
 License-file:        LICENSE
 Author:              Juha Paananen
 Maintainer:          juha.paananen@gmail.com
+Homepage:            http://github.com/raimohanska/reactive-bacon
+Bug-reports:         http://github.com/raimohanska/reactive-bacon/issues
 Category:            Reactive
 Build-type:          Simple
 Cabal-version:       >=1.10
@@ -14,15 +17,15 @@ Cabal-version:       >=1.10
 Library
   hs-source-dirs: src
   Exposed-modules: Reactive.Bacon,
+                   Reactive.Bacon.Core,
+                   Reactive.Bacon.Observable,
                    Reactive.Bacon.Observable.Applicative,
                    Reactive.Bacon.Observable.Concat,
-                   Reactive.Bacon.Core,
                    Reactive.Bacon.Observable.IO,
                    Reactive.Bacon.Observable.Monadic,
-                   Reactive.Bacon.Observable,
                    Reactive.Bacon.Observable.List,
-                   Reactive.Bacon.PushCollection,
-                   Reactive.Bacon.Observable.Timed
+                   Reactive.Bacon.Observable.Timed,
+                   Reactive.Bacon.PushCollection
   Build-depends:
     base >= 4 && < 5,
     stm >= 2.2.0.1,
