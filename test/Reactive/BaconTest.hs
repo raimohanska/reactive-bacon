@@ -3,6 +3,7 @@ module Reactive.BaconTest(baconTests) where
 import Test.HUnit
 import Reactive.Bacon
 import Reactive.Bacon.PushCollection
+import Reactive.Bacon.Examples
 import Control.Concurrent.MVar
 import Control.Concurrent(forkIO, threadDelay)
 import Control.Monad
