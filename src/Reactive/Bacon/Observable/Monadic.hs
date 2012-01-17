@@ -3,12 +3,17 @@ module Reactive.Bacon.Observable.Monadic(selectManyE, switchE) where
 import Data.IORef
 import Reactive.Bacon.Core
 import Reactive.Bacon.Observable.Applicative
+import Reactive.Bacon.Observable
 import Control.Concurrent.STM
 import Control.Monad
 
 instance Monad Observable where
   return x = toObservable [x]
   (>>=) = selectManyE
+
+instance MonadPlus Observable where
+  mzero = neverE
+  mplus = mergeE
 
 selectManyE :: Source s => s a -> (a -> Observable b) -> Observable b
 selectManyE xs binder = Observable $ \(Observer sink) -> do

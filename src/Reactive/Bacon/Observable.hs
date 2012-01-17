@@ -17,6 +17,9 @@ toObserver next = Observer sink
   where sink (Next x) = next x >> return (More sink)
         sink End = return NoMore
 
+neverE :: Observable a
+neverE = obs []
+
 -- |Returns new Observable with a single, persistent connection to the wrapped observable
 -- Also returns Disposable for disconnecting from the source
 publishE :: Source s => s a -> IO (Observable a, Disposable)

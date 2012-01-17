@@ -1,4 +1,4 @@
-module Reactive.Bacon.Observable.List where
+module Reactive.Bacon.Observable.List() where
 
 import Reactive.Bacon.Core
 
