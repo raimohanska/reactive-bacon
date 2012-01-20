@@ -37,3 +37,10 @@ instance Eq a => Eq (Event a) where
 obs :: Source s => s a -> Observable a
 obs = toObservable
 
+neverE :: Observable a
+neverE = Observable $ \_ -> return $ (return ())
+
+toObserver :: (a -> IO()) -> Observer a
+toObserver next = Observer sink
+  where sink (Next x) = next x >> return (More sink)
+        sink End = return NoMore
