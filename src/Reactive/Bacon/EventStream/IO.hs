@@ -11,19 +11,19 @@ import Control.Monad
 -- | startProcess is a function whose params are "event sink" and "stop sign"
 fromStoppableProcess :: ((Event a -> IO ()) -> IO Bool -> IO ()) -> IO (EventStream a, IO ())
 fromStoppableProcess startProcess = do
-  pc <- newPushCollection
+  (stream, pushEvent) <- newPushCollection
   stopSignal <- newIORef False
   let getStopState = (readIORef stopSignal)
-  startProcess (guardedPush pc getStopState) getStopState
-  return (toEventStream pc, (writeIORef stopSignal True))
-  where guardedPush pc getStopState event = do stop <- getStopState
-                                               unless stop $ pushEvent pc event
+  startProcess (guardedPush pushEvent getStopState) getStopState
+  return (stream, (writeIORef stopSignal True))
+  where guardedPush pushEvent getStopState event = do stop <- getStopState
+                                                      unless stop $ pushEvent event
 
 fromNonStoppableProcess :: ((Event a -> IO ()) -> IO ()) -> IO (EventStream a)
 fromNonStoppableProcess startProcess = do
-  pc <- newPushCollection
-  startProcess (pushEvent pc)
-  return $ toEventStream pc
+  (stream, pushEvent) <- newPushCollection
+  startProcess (pushEvent)
+  return stream
 
 fromIO :: IO a -> IO (EventStream a)
 fromIO action = fromNonStoppableProcess $ \sink -> void $ forkIO $ action >>= sink . Next >> sink End

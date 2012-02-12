@@ -1,4 +1,4 @@
-module Reactive.Bacon.PushCollection(PushCollection, newPushCollection, push, pushEvent, newDispatcher, wrap) where
+module Reactive.Bacon.PushCollection(newPushCollection, newDispatcher, wrap) where
 
 import Reactive.Bacon.Core
 import Data.IORef
@@ -43,23 +43,21 @@ removeSubscription (PushCollection ref _ disposeRef _) s = do
 --   Automatically subscribes/unsubscribes from EventSource based on whether there
 --   are any EventSinks.
 wrap :: EventSource s => s a -> IO (EventStream a)
-wrap src = newPushCollection' src >>= return . obs
+wrap src = newPushCollection' src >>= return . fst
 
 newDispatcher :: ((a -> IO ()) -> IO Disposable) -> IO (EventStream a)
 newDispatcher pusher = wrap $ EventStream $ \sink -> pusher (void . sink . Next)
 
-newPushCollection' :: EventSource s => s a -> IO (PushCollection a)
+newPushCollection' :: EventSource s => s a -> IO (EventStream a, (Event a -> IO()))
 newPushCollection' src = do
   stateRef <- newIORef ([], 1)
   disposeRef <- newIORef Nothing
   endRef <- newIORef False
-  return $ PushCollection stateRef (obs src) disposeRef endRef
+  let pc = PushCollection stateRef (obs src) disposeRef endRef
+  return $ (obs pc, pushEvent pc)
 
-newPushCollection :: IO (PushCollection a)
+newPushCollection :: IO (EventStream a, (Event a -> IO ()))
 newPushCollection = newPushCollection' neverE
-
-push :: PushCollection a -> a -> IO ()
-push pc item = pushEvent pc $ Next item
 
 pushEvent :: PushCollection a -> Event a -> IO ()
 pushEvent pc@(PushCollection listRef src _ endRef) event = do

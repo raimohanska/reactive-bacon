@@ -49,12 +49,12 @@ combineWithLatestOfTest = propertyTest "combineWithLatestOfP combines values of 
   [("a1", "b1"), ("a2", "b2")]
 
 pushCollectionTests = [ TestLabel "PushCollection remembers End" $ TestCase $ do
-                        pc <- newPushCollection
+                        (stream, push) <- newPushCollection
                         events <- newIORef []
-                        pc ==> prependTo events
-                        pushEvent pc $ Next "lol"
-                        pushEvent pc End
-                        pushEvent pc $ Next "wut"
+                        stream ==> prependTo events
+                        push $ Next "lol"
+                        push End
+                        push $ Next "wut"
                         eventsSoFar <- readIORef events
                         assertEqual "discards events after End" ["lol"] eventsSoFar
                       ]

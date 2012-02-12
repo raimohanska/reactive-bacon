@@ -8,9 +8,9 @@ import Control.Concurrent
 import Control.Monad
 
 pushCollectionExample = do
-  pc <- newPushCollection
-  pc ==> print
-  push pc "lol"
+  (stream, push) <- newPushCollection
+  stream ==> print
+  push $ Next "lol"
 
 mapFilterExample = do
   sequentiallyE (seconds 1) [1, 2, 3, 1] 
@@ -19,13 +19,13 @@ mapFilterExample = do
       >>=! print
 
 mergeExample = do
-  c1 <- newPushCollection
-  c2 <- newPushCollection
+  (c1, push1) <- newPushCollection
+  (c2, push2) <- newPushCollection
   mergeE c1 c2 >>= takeE 3 >>=! print
-  push c1 "left"
-  push c2 "right"
-  push c1 "left2"
-  push c2 "don't show me"
+  push1 $ Next "left"
+  push2 $ Next "right"
+  push1 $ Next "left2"
+  push2 $ Next "don't show me"
 
 applicativeExample = do
   (c1, push1) <- newPushProperty
@@ -46,20 +46,20 @@ numExample = do
   pushX 2
 
 scanExample = do
-  numbers <- newPushCollection
+  (numbers, push) <- newPushCollection
   (scanE append [] numbers) >>= prefix "numbers=" >>=! print
   (scanE (+) 0 numbers) >>= prefix "sum=" >>=! print
   (scanE (*) 1 numbers) >>= prefix "product=" >>=! print
-  push numbers 1
-  push numbers 2
-  push numbers 3
+  push $ Next 1
+  push $ Next 2
+  push $ Next 3
 
 monadExample = do
-  search <- newPushCollection
+  (search, push) <- newPushCollection
   selectManyE httpCall search 
     >>= mapE ("http://lol.com/lolServlet?search=" ++) 
     >>=! print
-  push search "pron"
+  push $ Next "pron"
 
 httpCall :: String -> IO (EventStream String)
 httpCall request = return $ EventStream $ \sink -> 

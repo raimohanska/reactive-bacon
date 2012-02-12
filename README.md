@@ -80,7 +80,7 @@ So first I create two "pushable properties", and create a composite
 property "num". I assign the "print" side-effect and then push some
 values to the properties. The output should obviously contain numbers 115 and 125.
 
-EventStream is only a `Functor`. All functions on EventStream are in the IO
+EventStream only has an instance for `Functor`. All functions on EventStream are in the IO
 Monad, because most of them need mutable state to guarantee consistency
 (see below). The bright side of this is that you get a nice monadic
 syntax for applying transformations and side-effects, as in
@@ -214,7 +214,6 @@ and Discrete.
 Todo
 ----
 
-- Maybe replace PushCollection with (EventStream, pushEvent)
 - Fork "observable-bacon"
 - Combinators for EventStream/Property combo, like combineWithProperty
   :: EventStream a -> Property b -> (a -> b -> c) -> EventStream c

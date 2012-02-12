@@ -136,6 +136,6 @@ constantP :: a -> Property a
 constantP value = Property $ \sink -> sink (Initial value) >> return (return ())
 
 newPushProperty :: IO (Property a, (a -> IO ()))
-newPushProperty = do pc <- newPushCollection
-                     property <- fromEventSource pc
-                     return (property, push pc)
+newPushProperty = do (stream, pushEvent) <- newPushCollection
+                     property <- fromEventSource stream
+                     return (property, pushEvent . Next)
