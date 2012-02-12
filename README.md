@@ -162,7 +162,7 @@ for this Sink again.
 A `Property` behaves similarly to an `EventStream` except that 
 
 1. On a call to `addListener` it will deliver its current value (if any) to the provided
-`Event a -> IO HandleResult` function. 
+sink function. 
 2. This means that if the Property has previously emitted the value `x`
 to its sinks and that is the latest value emitted, it will deliver
 this value to any registered Sink.
@@ -186,6 +186,7 @@ Not on HackageDB yet, so you have to build it yourself. It's simple though: git 
 Status
 ------
 
+- Not "fully documented". Examples and tests should do though?
 - 27 test cases passing
 - Not tried out in "real life" yet
 - Not published on Hackage yet
