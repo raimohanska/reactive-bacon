@@ -1,24 +1,20 @@
-module Reactive.Bacon.Observable.Monadic(selectManyE, switchE) where
+module Reactive.Bacon.EventStream.Monadic(selectManyE, switchE) where
 
 import Data.IORef
 import Reactive.Bacon.Core
-import Reactive.Bacon.Observable.Applicative
-import Reactive.Bacon.Observable
+import Reactive.Bacon.EventStream.Combinators
+import Reactive.Bacon.EventStream
+import Reactive.Bacon.PushCollection
 import Control.Concurrent.STM
 import Control.Monad
 
-instance Monad Observable where
-  return x = toObservable [x]
-  (>>=) = selectManyE
-
-instance MonadPlus Observable where
-  mzero = neverE
-  mplus = mergeE
-
-selectManyE :: Source s => s a -> (a -> Observable b) -> Observable b
-selectManyE xs binder = Observable $ \(Observer sink) -> do
+-- EventStream is not a Monad
+-- However, selectManyE and switchE have a signature that's pretty close
+-- to monadic bind. The difference is that IO is allowed in the bind step.
+selectManyE :: EventSource s => (a -> IO (EventStream b)) -> s a -> IO (EventStream b)
+selectManyE binder xs = wrap $ EventStream $ \sink -> do
     state <- newTVarIO $ State sink Nothing 1 [] [] False
-    dispose <- subscribe (obs xs) $ Observer $ mainEventSink state
+    dispose <- subscribe (obs xs) $ mainEventSink state
     atomically $ modifyTVar state $ \state -> state { dispose = Just dispose }
     return $ disposeAll state
   where mainEventSink state eventA = do
@@ -34,9 +30,10 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
                   let id = counter s
                   writeTVar state $ s { counter = (counter s + 1), childIds = id : (childIds s) }
                   return id
-                child <- subscribe (binder x) $ Observer $ childEventSink id state
-                atomically $ modifyTVar state $ \s -> s { childDisposables = (child : childDisposables s) }
-                return $ More $ mainEventSink state
+                childStream <- binder x
+                childDispose <- subscribe childStream $ childEventSink id state
+                atomically $ modifyTVar state $ \s -> s { childDisposables = (childDispose : childDisposables s) }
+                return More
         childEventSink id state = \eventB -> do
                           case eventB of
                               End    -> do
@@ -51,10 +48,8 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
                                 sink <- withState state $ return.currentSink
                                 result <- sink (Next y)
                                 case result of
-                                    NoMore    -> disposeAll state >> return NoMore
-                                    More sink -> do
-                                      atomically (modifyTVar state $ \s -> s { currentSink = sink})
-                                      return (More $ childEventSink id state)
+                                    NoMore -> disposeAll state >> return NoMore
+                                    More -> return More
         disposeAll state = do
               (maybeDispose, children) <- withState state $ \s -> return (dispose s, childDisposables s)
               sequence_ children
@@ -64,10 +59,10 @@ selectManyE xs binder = Observable $ \(Observer sink) -> do
         removeChild state id = state { childIds = filter (/= id) (childIds state) }
         withState state action = atomically (readTVar state >>= action)
 
-switchE :: Source s => s a -> (a -> Observable b) -> Observable b
-switchE src binder = (obs src) >>= (`takeUntilE` src) . binder
+switchE :: EventSource s => (a -> IO (EventStream b)) -> s a -> IO (EventStream b)
+switchE binder src = selectManyE (binder >=> (takeUntilE src)) src
 
-data State a = State { currentSink :: Sink a, 
+data State a = State { currentSink :: EventSink a, 
                        dispose :: Maybe Disposable,
                        counter :: Int,
                        childIds :: [Int],

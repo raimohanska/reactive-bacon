@@ -18,14 +18,13 @@ Library
   hs-source-dirs: src
   Exposed-modules: Reactive.Bacon,
                    Reactive.Bacon.Core,
-                   Reactive.Bacon.Observable,
-                   Reactive.Bacon.Observable.Applicative,
-                   Reactive.Bacon.Observable.Concat,
-                   Reactive.Bacon.Observable.IO,
-                   Reactive.Bacon.Observable.Monadic,
-                   Reactive.Bacon.Observable.List,
-                   Reactive.Bacon.Observable.Timed,
-                   Reactive.Bacon.PushCollection
+                   Reactive.Bacon.EventStream,
+                   Reactive.Bacon.EventStream.Combinators,
+                   Reactive.Bacon.EventStream.IO,
+                   Reactive.Bacon.EventStream.Monadic,
+                   Reactive.Bacon.EventStream.Timed,
+                   Reactive.Bacon.PushCollection,
+                   Reactive.Bacon.Property
   Build-depends:
     base >= 4 && < 5,
     stm >= 2.2.0.1,

@@ -1,18 +1,16 @@
 module Reactive.Bacon (
   module Reactive.Bacon.Core,
-  module Reactive.Bacon.Observable.Applicative,
-  module Reactive.Bacon.Observable.Concat,
-  module Reactive.Bacon.Observable.IO,
-  module Reactive.Bacon.Observable.Monadic,
-  module Reactive.Bacon.Observable,
-  module Reactive.Bacon.Observable.List,
-  module Reactive.Bacon.Observable.Timed
+  module Reactive.Bacon.EventStream.Combinators,
+  module Reactive.Bacon.EventStream.IO,
+  module Reactive.Bacon.EventStream.Monadic,
+  module Reactive.Bacon.EventStream,
+  module Reactive.Bacon.Property,
+  module Reactive.Bacon.EventStream.Timed
   ) where
   import Reactive.Bacon.Core
-  import Reactive.Bacon.Observable.Applicative
-  import Reactive.Bacon.Observable.Concat
-  import Reactive.Bacon.Observable.IO
-  import Reactive.Bacon.Observable.Monadic
-  import Reactive.Bacon.Observable
-  import Reactive.Bacon.Observable.List
-  import Reactive.Bacon.Observable.Timed
+  import Reactive.Bacon.EventStream.Combinators
+  import Reactive.Bacon.EventStream.IO
+  import Reactive.Bacon.EventStream.Monadic
+  import Reactive.Bacon.EventStream
+  import Reactive.Bacon.Property
+  import Reactive.Bacon.EventStream.Timed
