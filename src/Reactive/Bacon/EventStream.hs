@@ -1,7 +1,7 @@
 module Reactive.Bacon.EventStream where
 
 import Reactive.Bacon.Core
-import Reactive.Bacon.PushCollection
+import Reactive.Bacon.PushStream
 import Control.Monad
 import Data.Maybe
 import Data.IORef

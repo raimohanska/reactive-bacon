@@ -3,7 +3,6 @@ module Reactive.Bacon.EventStream.Timed where
 
 import Reactive.Bacon.Core
 import Reactive.Bacon.EventStream.IO
-import Reactive.Bacon.PushCollection
 import Reactive.Bacon.EventStream.Monadic
 import System.Time
 import Control.Concurrent(threadDelay, forkIO)

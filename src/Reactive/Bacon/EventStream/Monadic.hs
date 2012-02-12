@@ -4,7 +4,7 @@ import Data.IORef
 import Reactive.Bacon.Core
 import Reactive.Bacon.EventStream.Combinators
 import Reactive.Bacon.EventStream
-import Reactive.Bacon.PushCollection
+import Reactive.Bacon.PushStream(wrap)
 import Control.Concurrent.STM
 import Control.Monad
 

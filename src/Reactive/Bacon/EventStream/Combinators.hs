@@ -2,7 +2,7 @@ module Reactive.Bacon.EventStream.Combinators(mergeE, takeUntilE, eitherE, combi
 
 import Reactive.Bacon.Core
 import Reactive.Bacon.EventStream
-import Reactive.Bacon.PushCollection
+import Reactive.Bacon.PushStream
 import Reactive.Bacon.Property
 import Data.IORef
 import Control.Monad

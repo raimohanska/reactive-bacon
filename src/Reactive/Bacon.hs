@@ -5,6 +5,7 @@ module Reactive.Bacon (
   module Reactive.Bacon.EventStream.Monadic,
   module Reactive.Bacon.EventStream,
   module Reactive.Bacon.Property,
+  module Reactive.Bacon.PushStream,
   module Reactive.Bacon.EventStream.Timed
   ) where
   import Reactive.Bacon.Core
@@ -13,4 +14,5 @@ module Reactive.Bacon (
   import Reactive.Bacon.EventStream.Monadic
   import Reactive.Bacon.EventStream
   import Reactive.Bacon.Property
+  import Reactive.Bacon.PushStream
   import Reactive.Bacon.EventStream.Timed

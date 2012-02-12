@@ -23,7 +23,7 @@ Library
                    Reactive.Bacon.EventStream.IO,
                    Reactive.Bacon.EventStream.Monadic,
                    Reactive.Bacon.EventStream.Timed,
-                   Reactive.Bacon.PushCollection,
+                   Reactive.Bacon.PushStream,
                    Reactive.Bacon.Property
   Build-depends:
     base >= 4 && < 5,

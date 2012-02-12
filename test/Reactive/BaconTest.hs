@@ -3,7 +3,7 @@ module Reactive.BaconTest(baconTests) where
 
 import Test.HUnit
 import Reactive.Bacon
-import Reactive.Bacon.PushCollection
+import Reactive.Bacon.PushStream
 import Reactive.Bacon.Property
 import Reactive.Bacon.Examples
 import Control.Concurrent.MVar
@@ -49,7 +49,7 @@ combineWithLatestOfTest = propertyTest "combineWithLatestOfP combines values of 
   [("a1", "b1"), ("a2", "b2")]
 
 pushCollectionTests = [ TestLabel "PushCollection remembers End" $ TestCase $ do
-                        (stream, push) <- newPushCollection
+                        (stream, push) <- newPushStream
                         events <- newIORef []
                         stream ==> prependTo events
                         push $ Next "lol"

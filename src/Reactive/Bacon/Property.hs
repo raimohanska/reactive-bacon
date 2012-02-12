@@ -11,7 +11,7 @@ where
 
 import Reactive.Bacon.Core
 import Reactive.Bacon.EventStream
-import Reactive.Bacon.PushCollection
+import Reactive.Bacon.PushStream
 import Control.Applicative
 import Data.IORef
 
@@ -136,6 +136,6 @@ constantP :: a -> Property a
 constantP value = Property $ \sink -> sink (Initial value) >> return (return ())
 
 newPushProperty :: IO (Property a, (a -> IO ()))
-newPushProperty = do (stream, pushEvent) <- newPushCollection
+newPushProperty = do (stream, pushEvent) <- newPushStream
                      property <- fromEventSource stream
                      return (property, pushEvent . Next)

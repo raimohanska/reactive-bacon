@@ -1,14 +1,14 @@
 module Reactive.Bacon.Examples where
 
 import Reactive.Bacon
-import Reactive.Bacon.PushCollection
+import Reactive.Bacon.PushStream
 import Reactive.Bacon.Property
 import Control.Applicative
 import Control.Concurrent
 import Control.Monad
 
 pushCollectionExample = do
-  (stream, push) <- newPushCollection
+  (stream, push) <- newPushStream
   stream ==> print
   push $ Next "lol"
 
@@ -19,8 +19,8 @@ mapFilterExample = do
       >>=! print
 
 mergeExample = do
-  (c1, push1) <- newPushCollection
-  (c2, push2) <- newPushCollection
+  (c1, push1) <- newPushStream
+  (c2, push2) <- newPushStream
   mergeE c1 c2 >>= takeE 3 >>=! print
   push1 $ Next "left"
   push2 $ Next "right"
@@ -46,7 +46,7 @@ numExample = do
   pushX 2
 
 scanExample = do
-  (numbers, push) <- newPushCollection
+  (numbers, push) <- newPushStream
   (scanE append [] numbers) >>= prefix "numbers=" >>=! print
   (scanE (+) 0 numbers) >>= prefix "sum=" >>=! print
   (scanE (*) 1 numbers) >>= prefix "product=" >>=! print
@@ -55,7 +55,7 @@ scanExample = do
   push $ Next 3
 
 monadExample = do
-  (search, push) <- newPushCollection
+  (search, push) <- newPushStream
   selectManyE httpCall search 
     >>= mapE ("http://lol.com/lolServlet?search=" ++) 
     >>=! print
