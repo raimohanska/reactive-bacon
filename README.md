@@ -152,19 +152,17 @@ The rules are deliberately redundant, explaining the constraints from
 different perspectives. The contract between an EventStream and its
 Sink is as follows:
 
-1. For each incoming event, the function `consume :: Event a -> IO HandleResult
+1. For each incoming event, the sink function `Event a -> IO HandleResult
 a` is called.
 2. The function returns a `HandleResult` which is either `NoMore` or
-`More consume`
+`More`
 3. In case of `NoMore` the source must never call the consume function
 for this Sink again.
-4. In case of `More consume` the source will deliver any further events
-using the newly supplied consume-function.
 
 A `Property` behaves similarly to an `EventStream` except that 
 
 1. On a call to `addListener` it will deliver its current value (if any) to the provided
-`consume : Event a -> IO HandleResult` function. 
+`Event a -> IO HandleResult` function. 
 2. This means that if the Property has previously emitted the value `x`
 to its sinks and that is the latest value emitted, it will deliver
 this value to any registered Sink.
