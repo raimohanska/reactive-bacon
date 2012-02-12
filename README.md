@@ -139,36 +139,36 @@ The state of an EventStream can be defined as (t, os) where `t` is time
 and `os` the list of current sinks. This state should define the
 behavior of the stream in the sense that
 
-1) When an event is emitted, the same event is emitted to all sinks
-2) After an event has been emitted, it will never be emitted again, even
+1. When an event is emitted, the same event is emitted to all sinks
+2. After an event has been emitted, it will never be emitted again, even
 if a new sink is registered.
-3) When a new sink is registered, it will get exactly the same
+3. When a new sink is registered, it will get exactly the same
 events as the other sink, after registration. This means that the
 stream cannot emit any "initial" events to the new sink, unless it
 emits them to all of its sinks.
-5) A stream must never emit eny other events after End (not even another End)
+4. A stream must never emit eny other events after End (not even another End)
 
 The rules are deliberately redundant, explaining the constraints from
 different perspectives. The contract between an EventStream and its
 Sink is as follows:
 
-1) For each incoming event, the function `consume :: Event a -> IO HandleResult
+1. For each incoming event, the function `consume :: Event a -> IO HandleResult
 a` is called.
-2) The function returns a `HandleResult` which is either `NoMore` or
+2. The function returns a `HandleResult` which is either `NoMore` or
 `More consume`
-3) In case of `NoMore` the source must never call the consume function
+3. In case of `NoMore` the source must never call the consume function
 for this Sink again.
-4) In case of `More consume` the source will deliver any further events
+4. In case of `More consume` the source will deliver any further events
 using the newly supplied consume-function.
 
 A `Property` behaves similarly to an `EventStream` except that 
 
-1) On a call to `addListener` it will deliver its current value (if any) to the provided
+1. On a call to `addListener` it will deliver its current value (if any) to the provided
 `consume : Event a -> IO HandleResult` function. 
-2) This means that if the Property has previously emitted the value `x`
+2. This means that if the Property has previously emitted the value `x`
 to its sinks and that is the latest value emitted, it will deliver
 this value to any registered Sink.
-3) Property may or may not have a current value to start with.
+3. Property may or may not have a current value to start with.
 
 EventStream is not a Monad
 --------------------------
