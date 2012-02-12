@@ -188,7 +188,7 @@ Not on HackageDB yet, so you have to build it yourself. It's simple though: git 
 Status
 ------
 
-- 18 test cases passing
+- 27 test cases passing
 - Not tried out in "real life" yet
 - Not published on Hackage yet
 
