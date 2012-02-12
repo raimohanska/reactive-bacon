@@ -98,6 +98,28 @@ The custom infix operators introduced in bacon are
 - `>>=!` : a convenience-monadic version of the above, see usabe above. So `>>=! f` is
   equivalent to `>>= (==> f)`
 
+Implementations
+---------------
+
+For `EventStream`, there are several implementations included. In the
+`Reactive.Bacon.EventStream.Timed` module, there are
+
+- `laterE` that emits the given event after the given delay.
+- `periodicallyE` that repeats the given element with given interval
+- `sequentiallyE` that emits a list of elements with a given delay
+  between
+- `timedE` that accepts a list of event-delay pairs
+- `delayE` that adds delay to given stream
+- `throttleE` that throttles the given stream
+
+The `Reactive.Bacon.PushStream` module in turn allows you to create a
+"pushable" stream using the newPushStream function. You'll get a stream
+as well as a function for pushing new events into the stream.
+
+For Property, there's `newPushProperty` plus the possibility to convert
+any EventStream in to a Property using `fromEventStream` or
+`fromEventStreamWithStartValue`.
+
 Differences to RX:
 ------------------
 
@@ -167,6 +189,36 @@ sink function.
 to its sinks and that is the latest value emitted, it will deliver
 this value to any registered Sink.
 3. Property may or may not have a current value to start with.
+
+Implementing your own EventStream
+---------------------------------
+
+As you'll soon enough notice, there are no bindings to GUI libraries
+available. So prepare to roll your own bindings if you need any.
+
+The `Reactive.Bacon.EventStream.IO` module allows you to create an
+EventStream from a "stoppable" or "non-stoppable" process using the
+functions `fromStoppableProcess` and `fromNonStoppableProcess`.
+
+You can also create an EventStream by using the EventStream constructor,
+in which case you'll have to manage Sinks, which are the functions
+registered as "observers" to your stream. So, you'll have to implement the 
+"subscribe" function there. Then you'll
+also have to implement the "dispose" function that is the return value
+of "subscribe". The "subscribe" function will be called for each new
+sink added to your stream. The sink may later unsubscribe either by
+calling "dispose" or by returning `NoMore` as the result of any event.
+So, make sure you respect both ways of unsubscribing.
+
+In case your
+"subscribe" function actually has any side-effects (even mutable state),
+you should use `wrap` to ensure consistency between sinks. For instance,
+if your stream starts any background process on-subscribe, you should
+definitely use `wrap` which will also ensure that a single background
+process is started regardless of the number of sinks.
+
+On the other hand, if the subscription is stateless (like subscribing to
+mouse clicks), there's no need for wrapping.
 
 EventStream is not a Monad
 --------------------------
