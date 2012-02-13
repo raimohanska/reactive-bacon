@@ -13,9 +13,9 @@ pushCollectionExample = do
   push $ Next "lol"
 
 mapFilterExample = do
-  sequentiallyE (seconds 1) [1, 2, 3, 1] 
+  sequentiallyE (seconds 1) [1, 2, 3, 1]
       >>= filterE (<3) 
-      >>= mapE (("x=" ++) . show) 
+      >>= mapE (("x=" ++) . show)
       >>=! print
 
 mergeExample = do
@@ -56,13 +56,13 @@ scanExample = do
 
 monadExample = do
   (search, push) <- newPushStream
-  selectManyE httpCall search 
-    >>= mapE ("http://lol.com/lolServlet?search=" ++) 
+  selectManyE httpCall search
+    >>= mapE ("http://lol.com/lolServlet?search=" ++)
     >>=! print
   push $ Next "pron"
 
 httpCall :: String -> IO (EventStream String)
-httpCall request = return $ EventStream $ \sink -> 
+httpCall request = return $ EventStream $ \sink ->
                             do forkIO $ do
                                   putStrLn $ "Sending request " ++ request
                                   threadDelay 1000000
@@ -74,4 +74,3 @@ prefix p e = mapE((p ++) .show) e
 
 append :: [a] -> a -> [a]
 append xs x = xs ++ [x]
-
