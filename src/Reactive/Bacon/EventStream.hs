@@ -14,6 +14,9 @@ instance Functor EventStream where
 mapE :: EventSource s => (a -> b) -> s a -> IO (EventStream b)
 mapE f = return . (fmap f) . obs
 
+voidE :: EventSource s => s a -> IO (EventStream ())
+voidE = mapE (const ())
+
 scanE :: EventSource s => (b -> a -> b) -> b -> s a -> IO (EventStream b)
 scanE f seed src = do acc <- newTVarIO seed
                       wrap $ sinkMap (scanSink acc) src
