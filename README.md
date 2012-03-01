@@ -233,7 +233,12 @@ Sorry dudes.
 Building and using
 ------------------
 
-Not on HackageDB yet, so you have to build it yourself. It's simple though: git clone, cabal install and it's there. You may now try it in GHCI, as in the examples above.
+It's simple: git clone, cabal install and it's there. You may now try it in GHCI, as in the examples above.
+
+I've published this on HackageDB too, so you'll get you some tasty bacon
+by issuing the following:
+
+    cabal install reactive-bacon
 
 Status
 ------
@@ -241,7 +246,6 @@ Status
 - Not "fully documented". Examples and tests should do though?
 - 27 test cases passing
 - Not tried out in "real life" yet
-- Not published on Hackage yet
 
 Design considerations
 ---------------------
@@ -265,12 +269,10 @@ and Discrete.
 Todo
 ----
 
-- Fork "observable-bacon"
 - Combinators for EventStream/Property combo, like combineWithProperty
   :: EventStream a -> Property b -> (a -> b -> c) -> EventStream c
-- Documentation documentation documentation
+- Documentation for Hackage
 - mapReduceE, just for the sake of it
 - Try it out in the RUMP project
-- Publish to Hackage
 - Create a Javascript version when the design is settled. RxJs needs an
   open-source alternative.
