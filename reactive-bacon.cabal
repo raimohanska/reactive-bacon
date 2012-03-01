@@ -1,5 +1,5 @@
 Name:                reactive-bacon
-Version:             0.1
+Version:             0.2
 Stability:           experimental
 Synopsis:            FRP (functional reactive programming) framework
 Description:         FRP (functional reactive programming) framework inspired by RX, reactive-banana and Iteratee
@@ -37,7 +37,6 @@ Test-Suite tests
   Main-is:        Specs.hs
   Build-depends:  
     base >= 4 && < 5,
-    stm >= 2.2.0.1,
     old-time >= 1.0.0.6,
     HUnit >= 1.2.2.3, 
     containers >= 0.4.0.0 
