@@ -77,7 +77,7 @@ constant numbers as in
 ~~~
 
 So first I create two "pushable properties", and create a composite
-property "num". I assign the "print" side-effect and then push some
+property "sum". I assign the "print" side-effect and then push some
 values to the properties. The output should obviously contain numbers 115 and 125.
 
 EventStream only has an instance for `Functor`. All functions on EventStream are in the IO
