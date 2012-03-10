@@ -274,5 +274,3 @@ Todo
 - Documentation for Hackage
 - mapReduceE, just for the sake of it
 - Try it out in the RUMP project
-- Create a Javascript version when the design is settled. RxJs needs an
-  open-source alternative.
