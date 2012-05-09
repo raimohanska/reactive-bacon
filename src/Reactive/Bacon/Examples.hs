@@ -56,7 +56,7 @@ scanExample = do
 
 monadExample = do
   (search, push) <- newPushStream
-  selectManyE httpCall search
+  flatMapE httpCall search
     >>= mapE ("http://lol.com/lolServlet?search=" ++)
     >>=! print
   push $ Next "pron"

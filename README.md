@@ -224,7 +224,7 @@ EventStream is not a Monad
 --------------------------
 
 Well, that's it. It's nearly a monad, because there's a function named
-`selectMany` that has a signature almost equivalent to `>>=` but there's
+`flatMapE` that has a signature almost equivalent to `>>=` but there's
 a catch: It's not usually possible to create a new EventStream without
 resorting to IO, so the purely monadic signature would not make sense.
 Sorry dudes.

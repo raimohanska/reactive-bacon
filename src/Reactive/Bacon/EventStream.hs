@@ -34,6 +34,17 @@ filterE f = return . sinkMap filteredSink
         filteredSink sink (Next x) | f x  = sink (Next x)
                                    | otherwise = return More
 
+
+skipDuplicatesE :: EventSource s => Eq a => s a -> IO (EventStream a)
+skipDuplicatesE = scanE withEquality (Nothing, False) >=> filterE snd >=> mapE (fromJust . fst)
+  where withEquality (Nothing, _) x = (Just x, True)
+        withEquality (Just y, _) x | x == y = (Just x, False)
+                                   | otherwise = (Just x, True)
+
+stateMachineE :: EventSource s => (st -> a -> (st, b)) -> st -> s a -> IO (EventStream b)
+stateMachineE f startState = scanE scanF (startState, Nothing) >=> mapE (fromJust . snd)
+  where scanF (state, _) x = (fst $ f state x, Just $ snd $ f state x)
+
 takeWhileE :: EventSource s => (a -> Bool) -> s a -> IO (EventStream a)
 takeWhileE f src = do stopFlag <- newIORef False
                       wrap $ sinkMap (guardedSink stopFlag) src

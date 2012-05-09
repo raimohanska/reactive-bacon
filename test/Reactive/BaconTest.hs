@@ -17,7 +17,7 @@ baconTests = TestList $ mergeTest : eitherTest : laterTest : timedTest : filterT
   : takeTest : mapTest : combineWithTest : combineWithLatestOfTest : throttleTest
   : combineLatestTests ++ takeUntilTests 
   ++ delayTests ++ propertyTests ++ takeWhileTests ++ pushCollectionTests ++ wrapTests 
-  ++ monadTests
+  ++ monadTests ++ [skipDuplicatesTest]
 
 propertyTests = [
   propertyTest "Property can be constructed from EventStream"
@@ -151,6 +151,10 @@ filterTest = eventTest "filterE filters"
   (timed [(1, 10), (1, 20), (1, 30), (1, 10)] >>= filterE (<30)) 
   ([10, 20, 10])
 
+skipDuplicatesTest = eventTest "distinctUntilChanges skips repeating elements"
+  (timed [(1, "a"), (1, "b"), (1, "b"), (1, "c")] >>= skipDuplicatesE)
+  (["a", "b", "c"])
+
 mapTest = eventTest "mapE maps" 
   (timed [(1, 11), (1, 12)] >>= mapE (+1)) 
   ([12, 13])
@@ -160,8 +164,8 @@ scanTest = eventTest "scanE scans"
   [1, 3]
 
 monadTests = [
-  eventTest "selectManyE spawns new stream for each input and collects results"
-  (src >>= selectManyE spawner)
+  eventTest "flatMapE spawns new stream for each input and collects results"
+  (src >>= flatMapE spawner)
   [1, 10, 2, 20, 3, 30]
   , eventTest "switchE switches between spawned streams"
   (src >>= switchE spawner)

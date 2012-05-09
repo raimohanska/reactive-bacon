@@ -1,4 +1,4 @@
-module Reactive.Bacon.EventStream.Monadic(selectManyE, switchE) where
+module Reactive.Bacon.EventStream.Monadic(flatMapE, switchE) where
 
 import Data.IORef
 import Reactive.Bacon.Core
@@ -9,10 +9,10 @@ import Control.Concurrent.STM
 import Control.Monad
 
 -- EventStream is not a Monad
--- However, selectManyE and switchE have a signature that's pretty close
+-- However, flatMapE and switchE have a signature that's pretty close
 -- to monadic bind. The difference is that IO is allowed in the bind step.
-selectManyE :: EventSource s => (a -> IO (EventStream b)) -> s a -> IO (EventStream b)
-selectManyE binder xs = wrap $ EventStream $ \sink -> do
+flatMapE :: EventSource s => (a -> IO (EventStream b)) -> s a -> IO (EventStream b)
+flatMapE binder xs = wrap $ EventStream $ \sink -> do
     state <- newTVarIO $ State sink Nothing 1 [] [] False
     dispose <- subscribe (obs xs) $ mainEventSink state
     atomically $ modifyTVar state $ \state -> state { dispose = Just dispose }
@@ -60,7 +60,7 @@ selectManyE binder xs = wrap $ EventStream $ \sink -> do
         withState state action = atomically (readTVar state >>= action)
 
 switchE :: EventSource s => (a -> IO (EventStream b)) -> s a -> IO (EventStream b)
-switchE binder src = selectManyE (binder >=> (takeUntilE src)) src
+switchE binder src = flatMapE (binder >=> (takeUntilE src)) src
 
 data State a = State { currentSink :: EventSink a, 
                        dispose :: Maybe Disposable,

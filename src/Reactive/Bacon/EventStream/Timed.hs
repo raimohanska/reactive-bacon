@@ -29,7 +29,7 @@ timedE events = fromStoppableProcess $ \sink stopper -> void $ forkIO $ serve si
             serve sink events getStopState
 
 delayE :: EventSource s => TimeDiff -> s a -> IO (EventStream a)
-delayE diff = selectManyE (laterE diff)
+delayE diff = flatMapE (laterE diff)
 
 throttleE :: EventSource s => TimeDiff -> s a -> IO (EventStream a)
 throttleE diff = switchE (laterE diff)
