@@ -5,7 +5,7 @@ import Reactive.Bacon.Core
 import Reactive.Bacon.EventStream.Combinators
 import Reactive.Bacon.EventStream
 import Reactive.Bacon.PushStream(wrap)
-import Control.Concurrent.STM hiding (modifyTVar)
+import Control.Concurrent.STM(STM, TVar, newTVarIO, atomically, writeTVar, readTVar)
 import Control.Monad
 
 -- EventStream is not a Monad
