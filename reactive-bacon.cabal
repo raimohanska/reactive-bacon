@@ -1,5 +1,5 @@
 Name:                reactive-bacon
-Version:             0.4
+Version:             0.4.1
 Stability:           experimental
 Synopsis:            FRP (functional reactive programming) framework
 Description:         FRP (functional reactive programming) framework inspired by RX, reactive-banana and Iteratee
@@ -9,7 +9,7 @@ Author:              Juha Paananen
 Maintainer:          juha.paananen@gmail.com
 Homepage:            http://github.com/raimohanska/reactive-bacon
 Bug-reports:         http://github.com/raimohanska/reactive-bacon/issues
-Category:            Reactive
+Category:            FRP
 Build-type:          Simple
 Cabal-version:       >=1.10
 
